@@ -3,40 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTF</title>
+  <title>Тріатлонний клуб</title>
   <link rel="stylesheet" href="./css/style.css" />
 </head>
 <body>
   <header>
-    <h1>Happy TRI Friends</h1>
+    <h1 data-i18n="header.title">Happy TRI Friends"</h1>
     <nav>
       <ul>
-        <li><a href="index.html">Головна</a></li>
-        <li><a href="pages/schedule.html">Розклад</a></li>
-        <li><a href="pages/subscriptions.html">Підписки</a></li>
-        <li><a href="pages/merch.html">Мерч</a></li>
-        <li><a href="pages/about.html">Про клуб</a></li>
+        <li><a href="index.html" data-i18n="nav.home">Головна</a></li>
+        <li><a href="schedule.html" data-i18n="nav.schedule">Розклад</a></li>
+        <li><a href="subscriptions.html" data-i18n="nav.subscriptions">Підписки</a></li>
+        <li><a href="merch.html" data-i18n="nav.merch">Мерч</a></li>
+        <li><a href="about.html" data-i18n="nav.about">Про клуб</a></li>
       </ul>
+      <select id="languageSwitcher">
+        <option value="uk">UA</option>
+        <option value="en">EN</option>
+      </select>
     </nav>
   </header>
 
   <main>
     <section class="hero">
-      <h2>Ласкаво просимо до нашої команди!</h2>
-      <p>Об'єднуємо три види спорту в один стиль життя</p>
-      <button id="joinBtn">Приєднатися</button>
+      <h2 data-i18n="hero.welcome">Ласкаво просимо до нашої команди!</h2>
+      <p data-i18n="hero.description">Об'єднуємо три види спорту в один стиль життя</p>
+      <button id="joinBtn" data-i18n="hero.join">Приєднатися</button>
     </section>
     <section class="gallery">
-      <img src="./assets/images/team1.jpg" alt="Наша команда" />
-      <img src="./assets/images/swim.jpg" alt="Плавання" />
-      <img src="./assets/images/run.jpg" alt="Біг" />
+      <img src="./assets/images/swim.png" alt="Swim" />
+      <img src="./assets/images/bike.png" alt="Bike" />
+      <img src="./assets/images/run.png" alt="Run" />
     </section>
   </main>
 
+  <section class="footer-image">
+    <img src="./assets/images/image.png" alt="Банер клубу" />
+  </section>
+
   <footer>
-    <p>&copy; 2025 Happy TRI Friends</p>
+    <p>&copy; Happy TRI Friends</p>
   </footer>
 
-  <script type="module" src="./dist/main.js"></script>
+  <script type="module" src="./dist/languageSwitcher.js"></script>
 </body>
 </html>
