@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Корзина - Happy TRI Friends</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Happy TRI Friends</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html">Головна</a></li>
+        <li><a href="schedule.html">Розклад</a></li>
+        <li><a href="subscriptions.html">Підписки</a></li>
+        <li><a href="merch.html">Мерч</a></li>
+        <li><a href="about.html">Про клуб</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="cart">
+      <h2>Ваша корзина</h2>
+      <ul id="cartItems"></ul>
+      <button id="checkoutBtn">Оформити замовлення</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Happy TRI Friends</p>
+  </footer>
+
+  <script>
+    // Завантаження товарів з локального сховища
+    const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartList = document.getElementById('cartItems');
+
+    if (cartItems.length === 0) {
+      cartList.innerHTML = '<p>Корзина порожня</p>';
+    } else {
+      cartItems.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        cartList.appendChild(li);
+      });
+    }
+
+    // Оформлення замовлення
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
+      alert('Дякуємо за замовлення!');
+      localStorage.removeItem('cart');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>

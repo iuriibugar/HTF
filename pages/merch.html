@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Мерч - Happy TRI Friends</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Happy TRI Friends</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html">Головна</a></li>
+        <li><a href="schedule.html">Розклад</a></li>
+        <li><a href="subscriptions.html">Підписки</a></li>
+        <li><a href="merch.html" class="active">Мерч</a></li>
+        <li><a href="about.html">Про клуб</a></li>
+      </ul>
+    </nav>
+    <button id="cartBtn">Корзина</button>
+  </header>
+
+  <main>
+    <section class="merch">
+      <h2>Наш мерч</h2>
+      <div class="merch-item">
+        <img src="../assets/images/tshirt.jpg" alt="Футболка Happy TRI Friends" />
+        <h3>Футболка Happy TRI Friends</h3>
+        <p>Ціна: 500 грн</p>
+        <button class="add-to-cart" data-item="Футболка">Придбати</button>
+      </div>
+      <div class="merch-item">
+        <img src="../assets/images/cap.jpg" alt="Кепка Happy TRI Friends" />
+        <h3>Кепка Happy TRI Friends</h3>
+        <p>Ціна: 300 грн</p>
+        <button class="add-to-cart" data-item="Кепка">Придбати</button>
+      </div>
+      <div class="merch-item">
+        <img src="../assets/images/bottle.jpg" alt="Пляшка для води Happy TRI Friends" />
+        <h3>Пляшка для води Happy TRI Friends</h3>
+        <p>Ціна: 400 грн</p>
+        <button class="add-to-cart" data-item="Пляшка">Придбати</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Happy TRI Friends</p>
+  </footer>
+
+  <script>
+    const cart = [];
+
+    // Додавання товарів у корзину
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.getAttribute('data-item');
+        cart.push(item);
+        alert(`Товар "${item}" додано до корзини!`);
+      });
+    });
+
+    // Перехід до сторінки корзини
+    document.getElementById('cartBtn').addEventListener('click', () => {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.location.href = 'cart.html';
+    });
+  </script>
+</body>
+</html>
