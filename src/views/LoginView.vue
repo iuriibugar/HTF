@@ -13,7 +13,7 @@
         <div class="bg-gradient-to-br from-blue-50 via-white to-blue-50 p-10 rounded-2xl shadow-2xl max-w-md w-full border border-blue-100">
           <!-- Логотип -->
           <div class="flex justify-center mb-6">
-            <img src="/HTF/HTF.png" alt="HTF Logo" class="w-24 h-24 rounded-full shadow-lg border-4 border-blue-500" />
+            <img src="/HTF.png" alt="HTF Logo" class="w-24 h-24 rounded-full shadow-lg border-4 border-blue-500" />
           </div>
           
           <h1 class="text-3xl font-bold mb-3 text-center text-gray-800">Вітаємо!</h1>

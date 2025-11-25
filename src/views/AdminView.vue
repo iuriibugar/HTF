@@ -707,7 +707,7 @@ async function saveScheduleToDatabase() {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('HTF - Розклад збережено', {
           body: `Успішно збережено ${trainingsToSave.length} тренувань`,
-          icon: '/HTF/HTF.png'
+          icon: '/HTF.png'
         })
       } else if ('Notification' in window && Notification.permission !== 'denied') {
         // Запитуємо дозвіл на нотифікації
@@ -715,7 +715,7 @@ async function saveScheduleToDatabase() {
           if (permission === 'granted') {
             new Notification('HTF - Розклад збережено', {
               body: `Успішно збережено ${trainingsToSave.length} тренувань`,
-              icon: '/HTF/HTF.png'
+              icon: '/HTF.png'
             })
           }
         })
@@ -909,7 +909,7 @@ const registerForTraining = async (training) => {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('HTF - Реєстрація успішна', {
         body: `${training.dayName}, ${training.time} - ${training.name}`,
-        icon: '/HTF/HTF.png'
+        icon: '/HTF.png'
       })
     }
     
@@ -951,7 +951,7 @@ const cancelRegistration = async (training) => {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('HTF - Реєстрацію скасовано', {
           body: `${training.dayName}, ${training.time} - ${training.name}`,
-          icon: '/HTF/HTF.png'
+          icon: '/HTF.png'
         })
       }
       
