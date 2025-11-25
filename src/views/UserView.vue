@@ -338,7 +338,7 @@ const registerForTraining = async (training) => {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('HTF - Реєстрація успішна', {
         body: `${training.dayName}, ${training.time} - ${training.name}`,
-        icon: '/HTF/HTF.png'
+        icon: '/HTF.png'
       })
     }
     
@@ -380,7 +380,7 @@ const cancelRegistration = async (training) => {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('HTF - Реєстрацію скасовано', {
           body: `${training.dayName}, ${training.time} - ${training.name}`,
-          icon: '/HTF/HTF.png'
+          icon: '/HTF.png'
         })
       }
       
