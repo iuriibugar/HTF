@@ -114,11 +114,11 @@
                           v-model="training.name" 
                           type="text" 
                           placeholder="Назва тренування *"
-                          list="training-names"
+                          :list="'training-names-' + training.type"
                           :class="['flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
                                    training.error && !training.name ? 'border-red-500' : 'border-gray-300']" />
-                        <datalist id="training-names">
-                          <option v-for="name in trainingNames" :key="name" :value="name"></option>
+                        <datalist :id="'training-names-' + training.type">
+                          <option v-for="name in getTrainingNames(training.type)" :key="name" :value="name"></option>
                         </datalist>
                       </div>
                     </div>
@@ -130,7 +130,7 @@
                         v-model="training.difficulty" 
                         :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
                                  training.error && !training.difficulty ? 'border-red-500' : 'border-gray-300']">
-                        <option v-for="level in difficultyLevels" :key="level.value" :value="level.value">
+                        <option v-for="level in getDifficultyLevels(training.type)" :key="level.value" :value="level.value">
                           {{ level.label }}
                         </option>
                       </select>
@@ -339,7 +339,7 @@ import { auth, db } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { collection, addDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore'
 import backgroundImage from '@/assets/background.png'
-import { trainingNames, difficultyLevels, trainingAddresses, trainingTypes, getTrainingIcon } from '@/data/trainingConfig'
+import { trainingNames, difficultyLevels, trainingAddresses, trainingTypes, getTrainingIcon, getDifficultyLevels, getTrainingNames } from '@/data/trainingConfig'
 
 const userName = ref('')
 const userEmail = ref('')
@@ -433,6 +433,24 @@ function addTraining(dayId) {
     })
   }
 }
+
+// Watch для автоматичного оновлення назви та складності при зміні типу
+watch(() => daysOfWeek.value.map(day => day.trainings.map(t => t.type)), (newTypes, oldTypes) => {
+  daysOfWeek.value.forEach(day => {
+    day.trainings.forEach(training => {
+      // Скидаємо складність до першого доступного значення для нового типу
+      const availableDifficulties = getDifficultyLevels(training.type)
+      if (availableDifficulties.length > 0 && !availableDifficulties.find(d => d.value === training.difficulty)) {
+        training.difficulty = availableDifficulties[0].value
+      }
+      // Скидаємо назву при зміні типу
+      const availableNames = getTrainingNames(training.type)
+      if (!availableNames.includes(training.name)) {
+        training.name = ''
+      }
+    })
+  })
+}, { deep: true })
 
 // Видалити тренування
 function removeTraining(dayId, index) {

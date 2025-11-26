@@ -1,22 +1,74 @@
 // Конфігурація для форми створення розкладу тренувань
 
+// Назви тренувань за типами
+export const trainingNamesByType = {
+  swimming: [
+    'Плавання ',
+    'Відкрита вода'
+  ],
+  running: [
+    'Біг',
+    'Біг трейл'
+  ],
+  cycling: [
+    'Велотренування'
+  ],
+  other: [
+    'Загальна підготовка',
+    'Силове тренування',
+    'Розтяжка'
+  ]
+}
+
+// Загальний список назв (для сумісності)
 export const trainingNames = [
   'Плавання',
-  'Легкий Трейл',
-  'Тренування По Бігу',
-  'Велопрогулянка',
-  'Інтервальне тренування',
-  'Відкрита вода',
-  'Брик тренування',
-  'Техніка плавання',
-  'Довга дистанція'
+  'Біг',
+  'Біг трейл',
+  'Велотренування'
 ]
 
+// Функція для отримання назв за типом
+export const getTrainingNames = (trainingType) => {
+  return trainingNamesByType[trainingType] || trainingNames
+}
+
+// Рівні складності за типом тренування
+export const difficultyByType = {
+  swimming: [
+    { value: 'ELEMENTARY', label: 'ELEMENTARY' },
+    { value: 'INTERMEDIATE', label: 'INTERMEDIATE' },
+    { value: 'HARD', label: 'HARD' }
+  ],
+  running: [
+    { value: 'RUN', label: 'LIGHT' },
+    { value: 'RUN', label: 'LONG' },
+    { value: 'RUN', label: 'Техніка' }
+  ],
+  cycling: [
+    { value: 'BIKE', label: 'Швидкий вівторок' },
+    { value: 'BIKE', label: 'Довге велотренування' },
+    { value: 'BIKE', label: 'Техніка' },
+    { value: 'BIKE', label: 'Coffee Ride' }
+  ],
+  other: [
+    { value: 'ELEMENTARY', label: 'ELEMENTARY' },
+    { value: 'INTERMEDIATE', label: 'INTERMEDIATE' },
+    { value: 'HARD', label: 'HARD' }
+  ]
+}
+
+// Загальні рівні (для сумісності зі старим кодом)
 export const difficultyLevels = [
   { value: 'ELEMENTARY', label: 'ELEMENTARY' },
   { value: 'INTERMEDIATE', label: 'INTERMEDIATE' },
   { value: 'HARD', label: 'HARD' }
 ]
+
+// Функція для отримання рівнів складності за типом
+export const getDifficultyLevels = (trainingType) => {
+  return difficultyByType[trainingType] || difficultyLevels
+}
 
 export const trainingAddresses = [
   'Басейн КНТУ, Вул. М. Бойчука 36А',
@@ -24,7 +76,8 @@ export const trainingAddresses = [
   'Стадіон КНУБА, вул. Освіти 5',
   'Голосієво',
   'ВДНГ',
-  'Труханів острів'
+  'Труханів острів',
+  'Обухівська траса'
 ]
 
 export const trainingTypes = [
