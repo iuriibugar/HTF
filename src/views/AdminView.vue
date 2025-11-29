@@ -515,11 +515,11 @@ async function generateSchedule() {
   ctx.fillStyle = '#ffffff'
   ctx.font = 'bold 60px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('Розклад тренувань', canvas.width / 2, 90)
+  ctx.fillText('Розклад тренувань', canvas.width / 2, 100)
   
   ctx.font = 'bold 80px Arial'
   ctx.fillStyle = '#ffd700'
-  ctx.fillText('HAPPY TRI FRIENDS', canvas.width / 2, 190)
+  ctx.fillText('HAPPY TRI FRIENDS', canvas.width / 2, 200)
 
   // Період тижня
   ctx.fillStyle = '#ffffff'
@@ -527,12 +527,12 @@ async function generateSchedule() {
   const startFormatted = formatDateUkrainian(weekStartDate.value)
   const endFormatted = formatDateUkrainian(weekEndDate.value)
   const year = getYear(weekEndDate.value)
-  ctx.fillText(`${startFormatted} - ${endFormatted} ${year}р`, canvas.width / 2, 260)
+  ctx.fillText(`${startFormatted} - ${endFormatted} ${year}р`, canvas.width / 2, 270)
 
   // Примітка про платність
   ctx.fillStyle = '#ffd700'
   ctx.font = '32px Arial'
-  ctx.fillText('($) — Відвідування цього тренування платне', canvas.width / 2, 320)
+  ctx.fillText('($) — Відвідування цього тренування платне', canvas.width / 2, 330)
 
   let yPosition = 360
 
@@ -559,55 +559,59 @@ async function generateSchedule() {
       ctx.lineWidth = 3
       ctx.strokeRect(40, yPosition, canvas.width - 80, blockHeight)
 
-      // День тижня зверху справа
-      ctx.fillStyle = '#ffd700'
-      ctx.font = 'bold 40px Arial'
-      ctx.textAlign = 'right'
-      ctx.fillText(dayAbbreviations[day.name] || day.name.substring(0, 2), canvas.width - 80, yPosition + 45)
 
-      let trainingYPosition = yPosition + 70
+      // Прибираємо заголовок дня тижня справа у рамці
+
+
+      let trainingYPosition = yPosition + 50; // Зменшено відступ для першого тренування
 
       // Малюємо всі тренування цього дня
       day.trainings.forEach((training, index) => {
         // Відступ між тренуваннями (не для першого)
         if (index > 0) {
-          trainingYPosition += 20 // Відступ між тренуваннями
+          trainingYPosition += 20; // Відступ між тренуваннями
         }
 
         // Іконка типу тренування
-        const typeConfig = trainingTypes.find(t => t.value === training.type)
-        const icon = typeConfig ? typeConfig.icon : '🏊'
-        ctx.font = '45px Arial'
-        ctx.textAlign = 'left'
-        ctx.fillText(icon, 60, trainingYPosition + 35)
+        const typeConfig = trainingTypes.find(t => t.value === training.type);
+        const icon = typeConfig ? typeConfig.icon : '🏊';
+        ctx.font = '45px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(icon, 60, trainingYPosition + 35);
 
-        // Назва тренування
-        ctx.fillStyle = '#ffffff'
-        ctx.font = 'bold 36px Arial'
-        const isPaidText = training.isPaid ? ' ($)' : ''
-        ctx.fillText(training.name + isPaidText, 130, trainingYPosition + 25)
+        // Перший рядок: назва тренування (з іконкою) + рівень складності
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        const isPaidText = training.isPaid ? ' ($)' : '';
+        ctx.textAlign = 'left';
+        ctx.fillText(training.name + isPaidText, 130, trainingYPosition + 25);
 
-        // Складність
-        ctx.fillStyle = '#ffd700'
-        ctx.font = '24px Arial'
-        ctx.fillText(training.difficulty, 130, trainingYPosition + 55)
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(training.difficulty, 500, trainingYPosition + 25);
 
-        // Час справа
-        ctx.fillStyle = '#ffd700'
-        ctx.font = 'bold 36px Arial'
-        ctx.textAlign = 'right'
-        ctx.fillText(training.time, canvas.width - 80, trainingYPosition + 40)
+        // Другий рядок: адреса (зменшений відступ), день тижня над часом, час
+        // Адреса (завжди для кожного тренування)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px Arial'; // Зменшено розмір
+        ctx.textAlign = 'left';
+        ctx.fillText(training.address, 130, trainingYPosition + 50);
 
-        // Адреса (тільки якщо це перше тренування або адреса відрізняється від попереднього)
-        if (index === 0 || training.address !== day.trainings[index - 1].address) {
-          ctx.fillStyle = '#ffffff'
-          ctx.font = '24px Arial'
-          ctx.textAlign = 'left'
-          ctx.fillText(training.address, 130, trainingYPosition + 85)
-        }
+        // День тижня (над часом)
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 34px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(dayAbbreviations[day.name] || day.name.substring(0, 2), canvas.width - 80, trainingYPosition + 25);
 
-        trainingYPosition += trainingHeight
-      })
+        // Час справа (нижче дня тижня)
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 28px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(training.time, canvas.width - 80, trainingYPosition + 55);
+
+        trainingYPosition += trainingHeight;
+      });
 
       yPosition += blockHeight + 20 // Додаємо відступ між днями
     }
