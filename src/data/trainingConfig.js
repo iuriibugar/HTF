@@ -41,15 +41,15 @@ export const difficultyByType = {
     { value: 'HARD', label: 'HARD' }
   ],
   running: [
-    { value: 'RUN', label: 'LIGHT' },
-    { value: 'RUN', label: 'LONG' },
-    { value: 'RUN', label: 'Техніка' }
+    { value: 'RUN_LIGHT', label: 'LIGHT' },
+    { value: 'RUN_LONG', label: 'LONG' },
+    { value: 'RUN_TECHNIQUE', label: 'Техніка' }
   ],
   cycling: [
-    { value: 'BIKE', label: 'Швидкий вівторок' },
-    { value: 'BIKE', label: 'Довге велотренування' },
-    { value: 'BIKE', label: 'Техніка' },
-    { value: 'BIKE', label: 'Coffee Ride' }
+    { value: 'BIKE_FAST_TUESDAY', label: 'Швидкий вівторок' },
+    { value: 'BIKE_LONG', label: 'Довге велотренування' },
+    { value: 'BIKE_TECHNIQUE', label: 'Техніка' },
+    { value: 'BIKE_COFFEE_RIDE', label: 'Coffee Ride' }
   ],
   other: [
     { value: 'ELEMENTARY', label: 'ELEMENTARY' },

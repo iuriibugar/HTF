@@ -110,16 +110,11 @@
                             {{ type.label }}
                           </option>
                         </select>
-                        <input 
-                          v-model="training.name" 
-                          type="text" 
+                        <CustomDropdown
+                          v-model="training.name"
+                          :options="getTrainingNames(training.type)"
                           placeholder="Назва тренування *"
-                          :list="'training-names-' + training.type"
-                          :class="['flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                                   training.error && !training.name ? 'border-red-500' : 'border-gray-300']" />
-                        <datalist :id="'training-names-' + training.type">
-                          <option v-for="name in getTrainingNames(training.type)" :key="name" :value="name"></option>
-                        </datalist>
+                        />
                       </div>
                     </div>
 
@@ -159,16 +154,11 @@
                     <div class="md:col-span-2">
                       <label class="block text-sm font-medium text-gray-700 mb-2">Адреса *</label>
                       <div class="flex gap-2">
-                        <input 
-                          v-model="training.address" 
-                          type="text" 
+                        <CustomDropdown
+                          v-model="training.address"
+                          :options="savedAddresses"
                           placeholder="Введіть адресу *"
-                          list="addresses"
-                          :class="['flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                                   training.error && !training.address ? 'border-red-500' : 'border-gray-300']" />
-                        <datalist id="addresses">
-                          <option v-for="addr in savedAddresses" :key="addr" :value="addr"></option>
-                        </datalist>
+                        />
                         <button 
                           @click="removeTraining(day.id, index)"
                           class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition">
@@ -332,6 +322,7 @@
 </template>
 
 <script setup>
+import CustomDropdown from '../components/CustomDropdown.vue'
 import Header from '../components/htfHeader.vue'
 import { ref, onMounted, computed, watch } from 'vue'
 import { getAllRegistrations } from '../services/trainingService'
@@ -438,16 +429,13 @@ function addTraining(dayId) {
 watch(() => daysOfWeek.value.map(day => day.trainings.map(t => t.type)), (newTypes, oldTypes) => {
   daysOfWeek.value.forEach(day => {
     day.trainings.forEach(training => {
-      // Скидаємо складність до першого доступного значення для нового типу
+      // Скидаємо складність до першого доступного значення для нового типу ТІЛЬКИ якщо вона порожня
       const availableDifficulties = getDifficultyLevels(training.type)
-      if (availableDifficulties.length > 0 && !availableDifficulties.find(d => d.value === training.difficulty)) {
+      if (!training.difficulty && availableDifficulties.length > 0) {
         training.difficulty = availableDifficulties[0].value
       }
-      // Скидаємо назву при зміні типу
-      const availableNames = getTrainingNames(training.type)
-      if (!availableNames.includes(training.name)) {
-        training.name = ''
-      }
+      // Очищаємо назву тренування при зміні типу
+      training.name = ''
     })
   })
 }, { deep: true })
