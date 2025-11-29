@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${backgroundImage})` }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${backgroundImage})` }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-40"></div>
 
@@ -11,10 +11,10 @@
       </div>
 
       <!-- Основний контент -->
-      <div class="flex-1 p-8">
+      <div class="flex-1 p-2 sm:p-4 md:p-8">
         <div class="max-w-6xl mx-auto">
           <!-- Заголовок -->
-          <div class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-8 mb-6">
+          <div class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-2 sm:p-4 md:p-8 mb-4 sm:mb-6">
             <h1 class="text-4xl font-bold text-gray-800 text-center mb-2 flex items-center justify-center gap-3">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
@@ -27,13 +27,13 @@
           </div>
 
           <!-- Завантаження -->
-          <div v-if="loading" class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-12 text-center">
+          <div v-if="loading" class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-4 sm:p-8 md:p-12 text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p class="text-gray-600">Завантаження розкладу...</p>
           </div>
 
           <!-- Немає розкладу -->
-          <div v-else-if="!schedule || !schedule.trainings || schedule.trainings.length === 0" class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-12 text-center">
+          <div v-else-if="!schedule || !schedule.trainings || schedule.trainings.length === 0" class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-4 sm:p-8 md:p-12 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
@@ -42,17 +42,17 @@
           </div>
 
           <!-- Список тренувань -->
-          <div v-else class="space-y-4">
+          <div v-else class="space-y-2 sm:space-y-4">
             <!-- Група по днях -->
             <div 
               v-for="(dayTrainings, dayName) in groupedTrainings" 
               :key="dayName"
-              class="flex gap-4"
+              class="flex flex-col sm:flex-row gap-2 sm:gap-4"
             >
               <!-- День тижня зліва -->
-              <div class="w-32 flex-shrink-0">
-                <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-4 text-center sticky top-4">
-                  <h2 class="text-lg font-bold text-white">
+              <div class="w-full sm:w-32 flex-shrink-0">
+                <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-2 sm:p-4 text-center sticky top-4">
+                  <h2 class="text-base sm:text-lg font-bold text-white">
                     {{ dayName }}
                   </h2>
                 </div>

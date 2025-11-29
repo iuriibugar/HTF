@@ -23,33 +23,33 @@ function scrollDown() {
         <!-- Контент -->
         <div class="relative z-10">
             <Header />
-            <main class="text-center p-10 md:p-40">
+            <main class="text-center p-4 sm:p-6 md:p-10 lg:p-40">
                 <HomeView />
             </main>
         </div>
 
-        <!-- Кнопка внизу -->
+        <!-- Кнопка внизу, адаптивна -->
         <button 
             @click="scrollDown" 
-            class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-bold py-2 px-4 md:px-8 rounded-full hover:bg-yellow-500 transition">
+            class="fixed sm:absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-bold py-2 px-4 sm:px-6 md:px-8 rounded-full hover:bg-yellow-500 transition text-base sm:text-lg">
             Давай знайомитись
         </button>
     </div>
 
-    <div class="flex flex-col items-center justify-center h-auto bg-white text-black p-4 md:h-80">
-        <h1 class="text-2xl md:text-4xl font-bold mb-4 md:mb-10">Всі люди як люди, а Юрій молодець!</h1>
-        <p class="text-base md:text-lg mb-4 md:mb-0">Якщо потрібне наповнення я можу продовжити. Внизу по суті якась інфа про кемпи змагання, лігу і тд.</p>
+    <div class="flex flex-col items-center justify-center h-auto bg-white text-black p-4 sm:p-6 md:h-80">
+        <h1 class="text-xl sm:text-2xl md:text-4xl font-bold mb-4 md:mb-10">Всі люди як люди, а Юрій молодець!</h1>
+        <p class="text-sm sm:text-base md:text-lg mb-4 md:mb-0">Якщо потрібне наповнення я можу продовжити. Внизу по суті якась інфа про кемпи змагання, лігу і тд.</p>
     </div>
 
-    <!-- Блок із фото Тимура та текстом -->
-    <div class="flex flex-col md:flex-row items-center justify-center md:justify-between h-auto md:h-150 bg-gray-100 text-black p-4">
+    <!-- Блок із фото Тимура та текстом, адаптивний -->
+    <div class="flex flex-col md:flex-row items-center justify-center md:justify-between h-auto md:h-150 bg-gray-100 text-black p-4 sm:p-6 gap-4 md:gap-0">
         <!-- Фото Тимура -->
-        <img :src="timurImage" alt="Timur" class="w-2/3 md:w-1/3 h-auto mb-4 md:mb-0 ml-0 md:ml-20" />
+        <img :src="timurImage" alt="Timur" class="w-2/3 sm:w-1/2 md:w-1/3 h-auto mb-4 md:mb-0 ml-0 md:ml-20" />
 
         <!-- Текст праворуч -->
         <div class="w-full md:w-1/2 text-center md:text-left">
-            <h2 class="text-xl md:text-2xl font-bold mb-2 md:mb-4">Тимур</h2>
-            <p class="text-base md:text-lg">Тимур любитель попєтушитись</p>
+            <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-2 md:mb-4">Тимур</h2>
+            <p class="text-sm sm:text-base md:text-lg">Тимур любитель попєтушитись</p>
         </div>
     </div>
 </template>
