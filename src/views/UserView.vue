@@ -11,7 +11,7 @@
       </div>
 
       <!-- Основний контент з боковою панеллю -->
-      <div class="flex gap-4 p-4 flex-1 min-h-0">
+      <div class="flex flex-col lg:flex-row gap-2 lg:gap-4 p-2 sm:p-4 flex-1 min-h-0 overflow-y-auto">
         <!-- Бокова панель -->
         <aside class="w-80 bg-white bg-opacity-90 rounded-2xl shadow-lg p-4 flex-shrink-0 overflow-y-auto flex flex-col">
           <!-- Інформація про користувача -->
@@ -51,7 +51,7 @@
         </aside>
 
         <!-- Основний контент -->
-        <main class="flex-1 overflow-y-auto">
+        <main class="flex-1">
           <!-- Секція: Реєстрація на тренування -->
           <div v-if="activeSection === 'registration'" class="bg-white bg-opacity-90 rounded-2xl shadow-lg p-6">
             <h1 class="text-3xl font-bold mb-6">📅 Реєстрація на тренування</h1>

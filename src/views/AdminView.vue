@@ -11,9 +11,9 @@
       </div>
 
       <!-- Основний контент з боковою панеллю -->
-      <div class="flex gap-4 p-4 flex-1 min-h-0">
+      <div class="flex flex-col lg:flex-row gap-2 lg:gap-4 p-2 sm:p-4 flex-1 min-h-0 overflow-y-auto">
         <!-- Бокова панель меню -->
-        <aside class="w-80 bg-white bg-opacity-90 rounded-2xl shadow-lg p-4 flex-shrink-0 overflow-y-auto flex flex-col">
+        <aside class="w-full lg:w-80 bg-white bg-opacity-90 rounded-2xl shadow-lg p-2 sm:p-4 flex-shrink-0 overflow-y-auto flex flex-col mb-2 lg:mb-0">
           <!-- Інформація про користувача -->
           <div class="flex flex-col items-center mb-6 pb-6 border-b border-gray-200">
             <!-- Аватар користувача -->
@@ -62,14 +62,14 @@
         </aside>
 
         <!-- Основний контент -->
-        <main class="flex-1 overflow-y-auto">
+        <main class="flex-1 w-full">
           <!-- Секція: Сформувати розклад -->
-          <div v-if="activeSection === 'schedule'" class="bg-white bg-opacity-90 rounded-2xl shadow-lg p-6">
+          <div v-if="activeSection === 'schedule'" class="bg-white bg-opacity-90 rounded-2xl shadow-lg p-2 sm:p-4">
             <h1 class="text-3xl font-bold mb-6">Формування розкладу</h1>
             
             <!-- Вибір періоду -->
-            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div class="grid grid-cols-2 gap-4">
+            <div class="mb-4 sm:mb-6 p-2 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Дата початку тижня *</label>
                   <input 
@@ -91,13 +91,13 @@
             </div>
             
             <!-- Таблиця тренувань по днях тижня -->
-            <div class="space-y-6">
-              <div v-for="day in daysOfWeek" :key="day.id" class="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                <h3 class="text-xl font-semibold mb-4 text-gray-800">{{ day.name }}</h3>
+            <div class="space-y-4 sm:space-y-6">
+              <div v-for="day in daysOfWeek" :key="day.id" class="border border-gray-200 rounded-xl p-2 sm:p-4 bg-gray-50">
+                <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 text-gray-800">{{ day.name }}</h3>
                 
                 <!-- Список тренувань для цього дня -->
-                <div v-for="(training, index) in day.trainings" :key="index" class="mb-4 p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-for="(training, index) in day.trainings" :key="index" class="mb-2 sm:mb-4 p-2 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                     <!-- Тип тренування + Назва -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Тип тренування *</label>
