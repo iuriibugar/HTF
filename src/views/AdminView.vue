@@ -73,17 +73,21 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Дата початку тижня *</label>
                   <input 
+                    ref="startDateInput"
                     v-model="weekStartDate" 
                     type="date"
-                    :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                    @click="openDatePicker($event)"
+                    :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer',
                              weekYearError && !weekStartDate ? 'border-red-500' : 'border-gray-300']" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Дата кінця тижня *</label>
                   <input 
+                    ref="endDateInput"
                     v-model="weekEndDate" 
                     type="date"
-                    :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                    @click="openDatePicker($event)"
+                    :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer',
                              weekYearError && !weekEndDate ? 'border-red-500' : 'border-gray-300']" />
                 </div>
               </div>
@@ -425,6 +429,18 @@ function addTraining(dayId) {
   }
 }
 
+// Функція для відкриття календаря при кліку на поле дати
+function openDatePicker(event) {
+  const input = event.target
+  if (input && typeof input.showPicker === 'function') {
+    try {
+      input.showPicker()
+    } catch (error) {
+      // Якщо showPicker не спрацював, нічого не робимо (браузер сам відкриє календар)
+    }
+  }
+}
+
 // Watch для автоматичного оновлення назви та складності при зміні типу
 watch(() => daysOfWeek.value.map(day => day.trainings.map(t => t.type)), (newTypes, oldTypes) => {
   daysOfWeek.value.forEach((day, dayIndex) => {
@@ -489,6 +505,9 @@ async function generateSchedule() {
   // Чекаємо наступний тік, щоб canvas був у DOM
   await new Promise(resolve => setTimeout(resolve, 100))
   
+  // Чекаємо поки завантажиться Montserrat
+  await document.fonts.ready
+  
   const canvas = scheduleCanvas.value
   if (!canvas) {
     console.error('Canvas not found')
@@ -507,16 +526,16 @@ async function generateSchedule() {
 
   // Заголовок
   ctx.fillStyle = '#FFD700'
-  ctx.font = 'bold 70px Arial'
+  ctx.font = 'bold 70px Montserrat'
   ctx.textAlign = 'center'
   ctx.fillText('РОЗКЛАД ТРЕНУВАНЬ HTF', canvas.width / 2, 120)
 
   // Примітка про платність (справа, 2 рядки)
   // Перший рядок: ($) жовтим жирним + решта білим
   // Вимірюємо загальну ширину
-  ctx.font = 'bold 26px Arial'
+  ctx.font = 'bold 26px Montserrat'
   const dollarWidth = ctx.measureText('($) - ').width
-  ctx.font = '26px Arial'
+  ctx.font = '26px Montserrat'
   const restWidth = ctx.measureText('відвідування цього').width
   const totalWidth = dollarWidth + restWidth
   
@@ -525,18 +544,18 @@ async function generateSchedule() {
   
   // Малюємо ($) жовтим жирним
   ctx.fillStyle = '#FFD700'
-  ctx.font = 'bold 26px Arial'
+  ctx.font = 'bold 26px Montserrat'
   ctx.textAlign = 'left'
   ctx.fillText('($) - ', startX, 150)
   
   // Малюємо решту тексту білим
   ctx.fillStyle = '#ffffff'
-  ctx.font = '26px Arial'
+  ctx.font = '26px Montserrat'
   ctx.fillText('відвідування цього', startX + dollarWidth, 150)
   
   // Другий рядок: білим не жирним, вирівняний справа
   ctx.fillStyle = '#ffffff'
-  ctx.font = '26px Arial'
+  ctx.font = '26px Montserrat'
   ctx.textAlign = 'right'
   ctx.fillText('тренування платне', canvas.width - 60, 180)
 
@@ -657,7 +676,7 @@ async function generateSchedule() {
 
       // Текст дня тижня (вертикально по центру)
       ctx.fillStyle = '#000000'
-      ctx.font = '32px Arial'
+      ctx.font = '32px Montserrat'
       ctx.textAlign = 'center'
       const dayAbbr = dayAbbreviations[day.name] || day.name.substring(0, 2)
       const letters = dayAbbr.toUpperCase().split('')
@@ -722,7 +741,7 @@ async function generateSchedule() {
 
         // Частина 3: Назва тренування + ($) якщо платне, нижче адреса
         ctx.fillStyle = '#ffffff'
-        ctx.font = 'bold 34px Arial'
+        ctx.font = 'semi-bold 34px Montserrat'
         ctx.textAlign = 'left'
         ctx.fillText(training.name, trainingBlockX + 85, trainingYPosition + contentOffsetY + 25)
         
@@ -735,7 +754,7 @@ async function generateSchedule() {
 
         // Адреса нижче
         ctx.fillStyle = '#D1D5DB'
-        ctx.font = '22px Arial'
+        ctx.font = '22px Montserrat'
         ctx.fillText(training.address, trainingBlockX + 85, trainingYPosition + contentOffsetY + 55)
 
         // Частина 4 і 5: Складність та час (відцентровані по висоті блоку тренування)
@@ -748,7 +767,7 @@ async function generateSchedule() {
         
         training.difficultyTimes.forEach((diffTime, idx) => {
           // Малюємо рамку складності
-          ctx.font = '20px Arial'
+          ctx.font = '20px Montserrat'
           ctx.textAlign = 'left'
           const textWidth = ctx.measureText(diffTime.difficulty).width
           const padding = 15
@@ -763,7 +782,7 @@ async function generateSchedule() {
           
           // Часи в рядок через кому навпроти цієї складності (22px, не жирний)
           ctx.fillStyle = '#ffffff'
-          ctx.font = '22px Arial'
+          ctx.font = '22px Montserrat'
           ctx.textAlign = 'right'
           const timesText = diffTime.times.join(' | ')
           ctx.fillText(timesText, trainingBlockX + trainingBlockWidth - 30, diffY + 18)
