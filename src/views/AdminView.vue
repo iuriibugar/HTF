@@ -330,7 +330,7 @@ import { auth, db } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { collection, addDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore'
 import backgroundImage from '@/assets/background.png'
-import { trainingNames, difficultyLevels, trainingAddresses, trainingTypes, getTrainingIcon, getDifficultyLevels, getTrainingNames } from '@/data/trainingConfig'
+import { trainingNames, difficultyLevels, trainingAddresses, trainingTypes, getTrainingIcon, getDifficultyLevels, getTrainingNames, swimmingIconImg, runningIconImg, cyclingIconImg, otherIconImg } from '@/data/trainingConfig'
 
 const userName = ref('')
 const userEmail = ref('')
@@ -427,15 +427,21 @@ function addTraining(dayId) {
 
 // Watch для автоматичного оновлення назви та складності при зміні типу
 watch(() => daysOfWeek.value.map(day => day.trainings.map(t => t.type)), (newTypes, oldTypes) => {
-  daysOfWeek.value.forEach(day => {
-    day.trainings.forEach(training => {
-      // Скидаємо складність до першого доступного значення для нового типу ТІЛЬКИ якщо вона порожня
-      const availableDifficulties = getDifficultyLevels(training.type)
-      if (!training.difficulty && availableDifficulties.length > 0) {
-        training.difficulty = availableDifficulties[0].value
+  daysOfWeek.value.forEach((day, dayIndex) => {
+    day.trainings.forEach((training, trainingIndex) => {
+      // Перевіряємо чи змінився тип для цього конкретного тренування
+      const oldType = oldTypes[dayIndex]?.[trainingIndex]
+      const newType = newTypes[dayIndex]?.[trainingIndex]
+      
+      if (oldType && newType && oldType !== newType) {
+        // Скидаємо складність до першого доступного значення для нового типу
+        const availableDifficulties = getDifficultyLevels(training.type)
+        if (availableDifficulties.length > 0) {
+          training.difficulty = availableDifficulties[0].value
+        }
+        // Очищаємо назву тренування при зміні типу
+        training.name = ''
       }
-      // Очищаємо назву тренування при зміні типу
-      training.name = ''
     })
   })
 }, { deep: true })
@@ -496,33 +502,66 @@ async function generateSchedule() {
   canvas.height = 1920
 
   // Фон
-  ctx.fillStyle = '#1e3a5f'
+  ctx.fillStyle = '#2C3E5F'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   // Заголовок
-  ctx.fillStyle = '#ffffff'
-  ctx.font = 'bold 60px Arial'
+  ctx.fillStyle = '#FFD700'
+  ctx.font = 'bold 70px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('Розклад тренувань', canvas.width / 2, 100)
+  ctx.fillText('РОЗКЛАД ТРЕНУВАНЬ HTF', canvas.width / 2, 120)
+
+  // Примітка про платність (справа, 2 рядки)
+  // Перший рядок: ($) жовтим жирним + решта білим
+  // Вимірюємо загальну ширину
+  ctx.font = 'bold 26px Arial'
+  const dollarWidth = ctx.measureText('($) - ').width
+  ctx.font = '26px Arial'
+  const restWidth = ctx.measureText('відвідування цього').width
+  const totalWidth = dollarWidth + restWidth
   
-  ctx.font = 'bold 80px Arial'
-  ctx.fillStyle = '#ffd700'
-  ctx.fillText('HAPPY TRI FRIENDS', canvas.width / 2, 200)
-
-  // Період тижня
+  // Стартова позиція для лівого краю тексту
+  const startX = canvas.width - 60 - totalWidth
+  
+  // Малюємо ($) жовтим жирним
+  ctx.fillStyle = '#FFD700'
+  ctx.font = 'bold 26px Arial'
+  ctx.textAlign = 'left'
+  ctx.fillText('($) - ', startX, 150)
+  
+  // Малюємо решту тексту білим
   ctx.fillStyle = '#ffffff'
-  ctx.font = 'bold 40px Arial'
-  const startFormatted = formatDateUkrainian(weekStartDate.value)
-  const endFormatted = formatDateUkrainian(weekEndDate.value)
-  const year = getYear(weekEndDate.value)
-  ctx.fillText(`${startFormatted} - ${endFormatted} ${year}р`, canvas.width / 2, 270)
+  ctx.font = '26px Arial'
+  ctx.fillText('відвідування цього', startX + dollarWidth, 150)
+  
+  // Другий рядок: білим не жирним, вирівняний справа
+  ctx.fillStyle = '#ffffff'
+  ctx.font = '26px Arial'
+  ctx.textAlign = 'right'
+  ctx.fillText('тренування платне', canvas.width - 60, 180)
 
-  // Примітка про платність
-  ctx.fillStyle = '#ffd700'
-  ctx.font = '32px Arial'
-  ctx.fillText('($) — Відвідування цього тренування платне', canvas.width / 2, 330)
+  // Завантажуємо всі іконки
+  const loadedIcons = {}
+  const iconPromises = [
+    { type: 'swimming', src: swimmingIconImg },
+    { type: 'running', src: runningIconImg },
+    { type: 'cycling', src: cyclingIconImg },
+    { type: 'other', src: otherIconImg }
+  ].map(({ type, src }) => {
+    return new Promise(resolve => {
+      const img = new Image()
+      img.onload = () => {
+        loadedIcons[type] = img
+        resolve()
+      }
+      img.onerror = () => resolve() // Якщо помилка, продовжуємо без іконки
+      img.src = src
+    })
+  })
 
-  let yPosition = 360
+  await Promise.all(iconPromises)
+
+  let yPosition = 220
 
   const dayAbbreviations = {
     'Понеділок': 'Пн',
@@ -537,71 +576,218 @@ async function generateSchedule() {
   // Малюємо тренування по днях
   daysOfWeek.value.forEach(day => {
     if (day.trainings.length > 0) {
-      // Висота блоку залежить від кількості тренувань
-      const trainingHeight = 90 // Висота одного тренування всередині
-      const separatorHeight = day.trainings.length > 1 ? (day.trainings.length - 1) * 20 : 0 // 20px на кожну лінію (10 до + 10 після)
-      const blockHeight = 60 + (day.trainings.length * trainingHeight) + separatorHeight + 30 // Верх + тренування + роздільники + низ
+      // Групуємо однакові тренування
+      const groupedTrainings = []
+      day.trainings.forEach(training => {
+        // Шукаємо чи є вже така група (тип, платність, адреса співпадають)
+        const existingGroup = groupedTrainings.find(g => 
+          g.type === training.type && 
+          g.isPaid === training.isPaid && 
+          g.address === training.address &&
+          g.name === training.name
+        )
+        
+        if (existingGroup) {
+          // Шукаємо чи є вже така складність в групі
+          const difficultyEntry = existingGroup.difficultyTimes.find(d => d.difficulty === training.difficulty)
+          if (difficultyEntry) {
+            difficultyEntry.times.push(training.time)
+          } else {
+            existingGroup.difficultyTimes.push({
+              difficulty: training.difficulty,
+              times: [training.time]
+            })
+          }
+        } else {
+          // Створюємо нову групу
+          groupedTrainings.push({
+            type: training.type,
+            name: training.name,
+            isPaid: training.isPaid,
+            address: training.address,
+            difficultyTimes: [{
+              difficulty: training.difficulty,
+              times: [training.time]
+            }]
+          })
+        }
+      })
 
-      // Рамка для всього дня
-      ctx.strokeStyle = '#ffd700'
-      ctx.lineWidth = 3
-      ctx.strokeRect(40, yPosition, canvas.width - 80, blockHeight)
+      // Висота блоку залежить від кількості груп тренувань
+      // Рахуємо висоту кожного тренування окремо
+      const trainingHeights = []
+      let totalBlockHeight = 15 // Відступ зверху 15px
+      groupedTrainings.forEach((training, idx) => {
+        // Висота складностей
+        const diffCount = training.difficultyTimes.length
+        const difficultiesHeight = 28 + (diffCount - 1) * 35
+        
+        // Висота контенту тренування (від верху назви до низу адреси)
+        // Назва на +30, адреса на +60, тому контент займає приблизно 60px
+        const contentHeight = 60
+        
+        // Висота тренування = максимум з висоти складностей або контенту + відступи
+        const trainingHeight = Math.max(difficultiesHeight, contentHeight) + 30 // +30px для відступів зверху/знизу
+        trainingHeights.push(trainingHeight)
+        totalBlockHeight += trainingHeight
+        
+        // Додаємо відступ для роздільника між тренуваннями (крім останнього)
+        if (idx < groupedTrainings.length - 1) {
+          totalBlockHeight += 15 // 15px відступ між тренуваннями
+        }
+      })
+      totalBlockHeight += 15 // Відступ знизу 15px
+      const blockHeight = totalBlockHeight
 
+      // Жовтий квадрат дня тижня зліва (приліплений до блоку)
+      const dayBoxWidth = 45
+      const dayBoxHeight = blockHeight
+      ctx.fillStyle = '#FFD700'
+      // Заокруглені краї зліва
+      ctx.beginPath()
+      ctx.moveTo(40 + 15, yPosition)
+      ctx.lineTo(40 + dayBoxWidth, yPosition)
+      ctx.lineTo(40 + dayBoxWidth, yPosition + dayBoxHeight)
+      ctx.lineTo(40 + 15, yPosition + dayBoxHeight)
+      ctx.arcTo(40, yPosition + dayBoxHeight, 40, yPosition + dayBoxHeight - 15, 15)
+      ctx.lineTo(40, yPosition + 15)
+      ctx.arcTo(40, yPosition, 40 + 15, yPosition, 15)
+      ctx.closePath()
+      ctx.fill()
 
-      // Прибираємо заголовок дня тижня справа у рамці
+      // Текст дня тижня (вертикально по центру)
+      ctx.fillStyle = '#000000'
+      ctx.font = '32px Arial'
+      ctx.textAlign = 'center'
+      const dayAbbr = dayAbbreviations[day.name] || day.name.substring(0, 2)
+      const letters = dayAbbr.toUpperCase().split('')
+      const letterSpacing = 38
+      const totalHeight = letters.length * letterSpacing
+      const startY = yPosition + (dayBoxHeight - totalHeight) / 2 + 30
+      
+      letters.forEach((letter, idx) => {
+        ctx.fillText(letter, 40 + dayBoxWidth / 2, startY + idx * letterSpacing)
+      })
 
+      // Темний блок з жовтою обводкою для тренувань (приліплений до дня)
+      const trainingBlockX = 40 + dayBoxWidth
+      const trainingBlockWidth = canvas.width - trainingBlockX - 50
+      ctx.fillStyle = '#2C3E5F'
+      // Заокруглені краї справа
+      ctx.beginPath()
+      ctx.moveTo(trainingBlockX, yPosition)
+      ctx.lineTo(trainingBlockX + trainingBlockWidth - 15, yPosition)
+      ctx.arcTo(trainingBlockX + trainingBlockWidth, yPosition, trainingBlockX + trainingBlockWidth, yPosition + 15, 15)
+      ctx.lineTo(trainingBlockX + trainingBlockWidth, yPosition + blockHeight - 15)
+      ctx.arcTo(trainingBlockX + trainingBlockWidth, yPosition + blockHeight, trainingBlockX + trainingBlockWidth - 15, yPosition + blockHeight, 15)
+      ctx.lineTo(trainingBlockX, yPosition + blockHeight)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Жовта обводка навколо всього блоку (включно з днем тижня)
+      ctx.strokeStyle = '#FFD700'
+      ctx.lineWidth = 4
+      ctx.beginPath()
+      ctx.moveTo(40 + 15, yPosition)
+      ctx.lineTo(trainingBlockX + trainingBlockWidth - 15, yPosition)
+      ctx.arcTo(trainingBlockX + trainingBlockWidth, yPosition, trainingBlockX + trainingBlockWidth, yPosition + 15, 15)
+      ctx.lineTo(trainingBlockX + trainingBlockWidth, yPosition + blockHeight - 15)
+      ctx.arcTo(trainingBlockX + trainingBlockWidth, yPosition + blockHeight, trainingBlockX + trainingBlockWidth - 15, yPosition + blockHeight, 15)
+      ctx.lineTo(40 + 15, yPosition + blockHeight)
+      ctx.arcTo(40, yPosition + blockHeight, 40, yPosition + blockHeight - 15, 15)
+      ctx.lineTo(40, yPosition + 15)
+      ctx.arcTo(40, yPosition, 40 + 15, yPosition, 15)
+      ctx.closePath()
+      ctx.stroke()
 
-      let trainingYPosition = yPosition + 50; // Зменшено відступ для першого тренування
+      let trainingYPosition = yPosition + 15 // Початковий відступ 15px
 
-      // Малюємо всі тренування цього дня
-      day.trainings.forEach((training, index) => {
-        // Відступ між тренуваннями (не для першого)
-        if (index > 0) {
-          trainingYPosition += 20; // Відступ між тренуваннями
+      // Малюємо всі групи тренувань цього дня
+      groupedTrainings.forEach((training, index) => {
+        const currentTrainingHeight = trainingHeights[index]
+        
+        // Розраховуємо висоту контенту (іконка + текст)
+        const contentHeight = 55 // Від верху іконки (0) до низу адреси (55px)
+        // Центруємо контент по висоті блоку тренування
+        const contentOffsetY = (currentTrainingHeight - contentHeight) / 2
+        
+        // Частина 1: День тижня (вже намальований)
+        
+        // Частина 2: Іконка типу тренування
+        const iconImg = loadedIcons[training.type]
+        if (iconImg) {
+          const iconSize = 50
+          ctx.drawImage(iconImg, trainingBlockX + 20, trainingYPosition + contentOffsetY, iconSize, iconSize)
         }
 
-        // Іконка типу тренування
-        const typeConfig = trainingTypes.find(t => t.value === training.type);
-        const icon = typeConfig ? typeConfig.icon : '🏊';
-        ctx.font = '45px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(icon, 60, trainingYPosition + 35);
+        // Частина 3: Назва тренування + ($) якщо платне, нижче адреса
+        ctx.fillStyle = '#ffffff'
+        ctx.font = 'bold 34px Arial'
+        ctx.textAlign = 'left'
+        ctx.fillText(training.name, trainingBlockX + 85, trainingYPosition + contentOffsetY + 25)
+        
+        // Додаємо ($) жовтим жирним якщо платне
+        if (training.isPaid) {
+          const nameWidth = ctx.measureText(training.name).width
+          ctx.fillStyle = '#FFD700'
+          ctx.fillText(' ($)', trainingBlockX + 85 + nameWidth, trainingYPosition + contentOffsetY + 25)
+        }
 
-        // Перший рядок: назва тренування (з іконкою) + рівень складності
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px Arial';
-        const isPaidText = training.isPaid ? ' ($)' : '';
-        ctx.textAlign = 'left';
-        ctx.fillText(training.name + isPaidText, 130, trainingYPosition + 25);
+        // Адреса нижче
+        ctx.fillStyle = '#D1D5DB'
+        ctx.font = '22px Arial'
+        ctx.fillText(training.address, trainingBlockX + 85, trainingYPosition + contentOffsetY + 55)
 
-        ctx.fillStyle = '#ffd700';
-        ctx.font = '24px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(training.difficulty, 500, trainingYPosition + 25);
+        // Частина 4 і 5: Складність та час (відцентровані по висоті блоку тренування)
+        const difficultyX = trainingBlockX + 500
+        const diffCount = training.difficultyTimes.length
+        const totalDiffHeight = 28 + (diffCount - 1) * 35 // Перша рамка 28px + (кількість - 1) * 35px
+        // Центруємо по висоті блоку тренування
+        const startDiffY = trainingYPosition + (currentTrainingHeight - totalDiffHeight) / 2
+        let diffY = startDiffY
+        
+        training.difficultyTimes.forEach((diffTime, idx) => {
+          // Малюємо рамку складності
+          ctx.font = '20px Arial'
+          ctx.textAlign = 'left'
+          const textWidth = ctx.measureText(diffTime.difficulty).width
+          const padding = 15
+          const diffWidth = textWidth + (padding * 2)
+          
+          ctx.strokeStyle = '#FFD700'
+          ctx.lineWidth = 2
+          ctx.strokeRect(difficultyX, diffY, diffWidth, 28)
+          
+          ctx.fillStyle = '#FFD700'
+          ctx.fillText(diffTime.difficulty, difficultyX + padding, diffY + 20)
+          
+          // Часи в рядок через кому навпроти цієї складності (22px, не жирний)
+          ctx.fillStyle = '#ffffff'
+          ctx.font = '22px Arial'
+          ctx.textAlign = 'right'
+          const timesText = diffTime.times.join(' | ')
+          ctx.fillText(timesText, trainingBlockX + trainingBlockWidth - 30, diffY + 18)
+          
+          diffY += 35
+        })
 
-        // Другий рядок: адреса (зменшений відступ), день тижня над часом, час
-        // Адреса (завжди для кожного тренування)
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '20px Arial'; // Зменшено розмір
-        ctx.textAlign = 'left';
-        ctx.fillText(training.address, 130, trainingYPosition + 50);
+        // Збільшуємо позицію для наступного тренування
+        trainingYPosition += currentTrainingHeight
 
-        // День тижня (над часом)
-        ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 34px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText(dayAbbreviations[day.name] || day.name.substring(0, 2), canvas.width - 80, trainingYPosition + 25);
+        // Роздільник між тренуваннями (якщо не останнє)
+        if (index < groupedTrainings.length - 1) {
+          trainingYPosition += 7.5 // Половина відступу перед лінією
+          ctx.strokeStyle = '#FFD700'
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.moveTo(trainingBlockX + 20, trainingYPosition)
+          ctx.lineTo(trainingBlockX + trainingBlockWidth - 20, trainingYPosition)
+          ctx.stroke()
+          trainingYPosition += 7.5 // Друга половина відступу після лінії
+        }
+      })
 
-        // Час справа (нижче дня тижня)
-        ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 28px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText(training.time, canvas.width - 80, trainingYPosition + 55);
-
-        trainingYPosition += trainingHeight;
-      });
-
-      yPosition += blockHeight + 20 // Додаємо відступ між днями
+      yPosition += blockHeight + 25
     }
   })
 }

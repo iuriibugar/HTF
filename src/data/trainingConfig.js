@@ -1,5 +1,11 @@
 // Конфігурація для форми створення розкладу тренувань
 
+// Імпорт іконок
+import swimmingIconImg from '@/assets/trainingIcons/icon-swimming.png'
+import runningIconImg from '@/assets/trainingIcons/icon-running.png'
+import cyclingIconImg from '@/assets/trainingIcons/icon-cycling.png'
+import otherIconImg from '@/assets/trainingIcons/icon-other.png'
+
 // Назви тренувань за типами
 export const trainingNamesByType = {
   swimming: [
@@ -80,11 +86,20 @@ export const trainingAddresses = [
   'Обухівська траса'
 ]
 
+// Іконки типів тренувань (емоджі для відображення в UI)
+export const swimmingIcon = '🏊'
+export const runningIcon = '🏃'
+export const cyclingIcon = '🚴'
+export const otherIcon = '📋'
+
+// Експортуємо іконки-картинки
+export { swimmingIconImg, runningIconImg, cyclingIconImg, otherIconImg }
+
 export const trainingTypes = [
-  { value: 'swimming', label: '🏊 Плавання', icon: '🏊', name: 'Плавання' },
-  { value: 'running', label: '🏃 Біг', icon: '🏃', name: 'Біг' },
-  { value: 'cycling', label: '🚴 Велосипед', icon: '🚴', name: 'Велосипед' },
-  { value: 'other', label: '📋 Інше', icon: '📋', name: 'Інше' }
+  { value: 'swimming', label: `Плавання`, icon: swimmingIcon, iconImg: swimmingIconImg, name: 'Плавання' },
+  { value: 'running', label: `Біг`, icon: runningIcon, iconImg: runningIconImg, name: 'Біг' },
+  { value: 'cycling', label: `Велосипед`, icon: cyclingIcon, iconImg: cyclingIconImg, name: 'Велосипед' },
+  { value: 'other', label: `Інше`, icon: otherIcon, iconImg: otherIconImg, name: 'Інше' }
 ]
 
 // Функція для отримання іконки за типом
