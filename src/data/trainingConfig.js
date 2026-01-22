@@ -10,19 +10,21 @@ import otherIconImg from '@/assets/trainingIcons/icon-other.png'
 export const trainingNamesByType = {
   swimming: [
     'Плавання ',
-    'Відкрита вода'
+    'Відкрита вода',
+    'Техніка плавання'
   ],
   running: [
     'Біг',
-    'Біг трейл'
+    'Легкий Трейл',
+    'Тренування По Бігу',
+    'Інтервальне тренування'
   ],
   cycling: [
     'Велотренування'
   ],
   other: [
-    'Загальна підготовка',
-    'Силове тренування',
-    'Розтяжка'
+    'Брик тренування',
+    'Довга дистанція'
   ]
 }
 
@@ -47,15 +49,14 @@ export const difficultyByType = {
     { value: 'HARD', label: 'HARD' }
   ],
   running: [
-    { value: 'RUN_LIGHT', label: 'LIGHT' },
-    { value: 'RUN_LONG', label: 'LONG' },
-    { value: 'RUN_TECHNIQUE', label: 'Техніка' }
+    { value: 'ELEMENTARY', label: 'ELEMENTARY' },
+    { value: 'INTERMEDIATE', label: 'INTERMEDIATE' },
+    { value: 'HARD', label: 'HARD' }
   ],
   cycling: [
-    { value: 'BIKE_FAST_TUESDAY', label: 'Швидкий вівторок' },
-    { value: 'BIKE_LONG', label: 'Довге велотренування' },
-    { value: 'BIKE_TECHNIQUE', label: 'Техніка' },
-    { value: 'BIKE_COFFEE_RIDE', label: 'Coffee Ride' }
+    { value: 'ELEMENTARY', label: 'ELEMENTARY' },
+    { value: 'INTERMEDIATE', label: 'INTERMEDIATE' },
+    { value: 'HARD', label: 'HARD' }
   ],
   other: [
     { value: 'ELEMENTARY', label: 'ELEMENTARY' },
@@ -77,7 +78,8 @@ export const getDifficultyLevels = (trainingType) => {
 }
 
 export const trainingAddresses = [
-  'Басейн КНТУ, Вул. М. Бойчука 36А',
+  'Басейн КНТУ, вул. М. Бойчука 36А',
+  'Басейн Олімпійський стиль, вул. Ділова, 10', 
   'Голосіївський проспект, 61',
   'Стадіон КНУБА, вул. Освіти 5',
   'Голосієво',
