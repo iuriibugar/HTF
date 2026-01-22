@@ -20,7 +20,8 @@ export const trainingNamesByType = {
     'Інтервальне тренування'
   ],
   cycling: [
-    'Велотренування'
+    'Велотренування',
+    'Indoor Zwift'
   ],
   other: [
     'Брик тренування',
