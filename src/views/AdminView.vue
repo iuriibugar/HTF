@@ -161,24 +161,23 @@
                 <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 text-gray-800">{{ day.name }}</h3>
                 
                 <!-- Список тренувань для цього дня -->
-                <div v-for="(training, index) in day.trainings" :key="index" class="mb-2 sm:mb-4 p-2 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                <div v-for="(training, index) in day.trainings" :key="`${day.id}-${index}-${forceUpdate}`" class="mb-2 sm:mb-4 p-2 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-100">
                   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                     <!-- Тип тренування + Назва -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Тип тренування *</label>
                       <div class="flex gap-2">
-                        <select 
-                          v-model="training.type" 
-                          :class="['px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                                   training.error && !training.type ? 'border-red-500' : 'border-gray-300']">
-                          <option v-for="type in trainingTypes" :key="type.value" :value="type.value">
-                            {{ type.label }}
-                          </option>
-                        </select>
+                        <CustomDropdown
+                          v-model="training.type"
+                          :options="trainingTypes"
+                          placeholder="Тип тренування *"
+                          :hasError="!!(training.error && !training.type)"
+                        />
                         <CustomDropdown
                           v-model="training.name"
                           :options="getTrainingNames(training.type)"
                           placeholder="Назва тренування *"
+                          :hasError="!!(training.error && !training.name)"
                         />
                       </div>
                     </div>
@@ -186,14 +185,12 @@
                     <!-- Складність -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Складність *</label>
-                      <select 
-                        v-model="training.difficulty" 
-                        :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                                 training.error && !training.difficulty ? 'border-red-500' : 'border-gray-300']">
-                        <option v-for="level in getDifficultyLevels(training.type)" :key="level.value" :value="level.value">
-                          {{ level.label }}
-                        </option>
-                      </select>
+                      <CustomDropdown
+                        v-model="training.difficulty"
+                        :options="getDifficultyLevels(training.type)"
+                        placeholder="Складність *"
+                        :hasError="!!(training.error && !training.difficulty)"
+                      />
                     </div>
 
                     <!-- Час початку -->
@@ -209,10 +206,11 @@
                     <!-- Платне тренування -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Тип оплати</label>
-                      <select v-model="training.isPaid" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Безкоштовно</option>
-                        <option value="paid">💵 Платне</option>
-                      </select>
+                      <CustomDropdown
+                        v-model="training.isPaid"
+                        :options="[{value: '', label: 'Безкоштовно'}, {value: 'paid', label: '💵 Платне'}]"
+                        placeholder="Безкоштовно"
+                      />
                     </div>
 
                     <!-- Адреса -->
@@ -223,6 +221,7 @@
                           v-model="training.address"
                           :options="savedAddresses"
                           placeholder="Введіть адресу *"
+                          :hasError="training.error && !training.address"
                         />
                         <button 
                           @click="removeTraining(day.id, index)"
@@ -390,7 +389,7 @@
 import CustomDropdown from '../components/CustomDropdown.vue'
 import Header from '../components/htfHeader.vue'
 import NotificationComponent from '../components/Notification.vue'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { getAllRegistrations } from '../services/trainingService'
 import { auth, db } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -422,6 +421,7 @@ const userRegistrations = ref([])
 const registrationSuccess = ref('')
 const saveError = ref(false)
 const saveErrorMessage = ref('')
+const forceUpdate = ref(0) // Для форсування оновлення компонентів
 
 // Для нотифікацій
 const notification = ref({
@@ -683,14 +683,15 @@ async function generateSchedule() {
   validationError.value = false
   weekYearError.value = false
   
+  let hasErrors = false
+  
   // Валідація дат
   if (!weekStartDate.value || !weekEndDate.value) {
     weekYearError.value = true
-    return
+    hasErrors = true
   }
   
   // Валідація всіх тренувань
-  let hasErrors = false
   daysOfWeek.value.forEach(day => {
     day.trainings.forEach(training => {
       training.error = false
@@ -704,6 +705,14 @@ async function generateSchedule() {
   // Якщо є помилки, показуємо повідомлення і виходимо
   if (hasErrors) {
     validationError.value = true
+    
+    // Форсуємо оновлення компонентів
+    forceUpdate.value++
+    
+    // Даємо Vue час оновити DOM з новими значеннями error
+    await nextTick()
+    
+    showNotification('error', 'Будь ласка, заповніть всі обов\'язкові поля (позначені зірочкою *)', 'Помилка валідації')
     return
   }
   
