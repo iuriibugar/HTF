@@ -3,6 +3,15 @@
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-40"></div>
 
+    <!-- Нотифікація -->
+    <NotificationComponent
+      :show="notification.show"
+      :type="notification.type"
+      :title="notification.title"
+      :message="notification.message"
+      @close="closeNotification"
+    />
+
     <!-- Весь контент -->
     <div class="relative z-10 h-full flex flex-col">
       <!-- Хедер -->
@@ -65,7 +74,59 @@
         <main class="flex-1 w-full">
           <!-- Секція: Сформувати розклад -->
           <div v-if="activeSection === 'schedule'" class="bg-white bg-opacity-90 rounded-2xl shadow-lg p-2 sm:p-4">
-            <h1 class="text-3xl font-bold mb-6">Формування розкладу</h1>
+            <!-- Заголовок з пагінацією -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+              <h1 class="text-3xl font-bold">Формування розкладу</h1>
+              
+              <!-- Пагінація розкладів -->
+              <div v-if="savedSchedules.length > 0" class="flex items-center gap-2">
+                <button
+                  @click="goToPreviousSchedule"
+                  :disabled="currentScheduleIndex === savedSchedules.length - 1"
+                  :class="[
+                    'px-3 py-2 rounded-lg font-bold transition-colors',
+                    currentScheduleIndex === savedSchedules.length - 1
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  ]"
+                  :title="'Старіші розклади'"
+                >
+                  &lt;
+                </button>
+                
+                <button
+                  @click="loadScheduleToForm"
+                  class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors"
+                  :title="'Завантажити розклад у форму'"
+                >
+                  {{ currentSavedSchedule ? `${currentScheduleIndex + 1}: ${formatDateRange(currentSavedSchedule.weekStart, currentSavedSchedule.weekEnd)}` : 'Немає розкладів' }}
+                </button>
+                
+                <button
+                  @click="goToNextSchedule"
+                  :disabled="currentScheduleIndex === 0"
+                  :class="[
+                    'px-3 py-2 rounded-lg font-bold transition-colors',
+                    currentScheduleIndex === 0
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  ]"
+                  :title="'Новіші розклади'"
+                >
+                  &gt;
+                </button>
+              </div>
+              
+              <!-- Завантаження -->
+              <div v-else-if="loadingSchedules" class="text-gray-500 text-sm">
+                Завантаження розкладів...
+              </div>
+              
+              <!-- Немає збережених розкладів -->
+              <div v-else class="text-gray-400 text-sm">
+                Немає збережених розкладів
+              </div>
+            </div>
             
             <!-- Вибір періоду -->
             <div class="mb-4 sm:mb-6 p-2 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -328,6 +389,7 @@
 <script setup>
 import CustomDropdown from '../components/CustomDropdown.vue'
 import Header from '../components/htfHeader.vue'
+import NotificationComponent from '../components/Notification.vue'
 import { ref, onMounted, computed, watch } from 'vue'
 import { getAllRegistrations } from '../services/trainingService'
 import { auth, db } from '../firebase'
@@ -348,6 +410,11 @@ const weekStartDate = ref('')
 const weekEndDate = ref('')
 const saveSuccess = ref(false)
 
+// Для пагінації розкладів
+const savedSchedules = ref([])
+const currentScheduleIndex = ref(0)
+const loadingSchedules = ref(false)
+
 // Для реєстрації
 const loadingSchedule = ref(false)
 const currentSchedule = ref(null)
@@ -355,6 +422,29 @@ const userRegistrations = ref([])
 const registrationSuccess = ref('')
 const saveError = ref(false)
 const saveErrorMessage = ref('')
+
+// Для нотифікацій
+const notification = ref({
+  show: false,
+  type: 'success', // 'success', 'warning', 'error'
+  title: '',
+  message: ''
+})
+
+// Функція для показу нотифікації
+function showNotification(type, message, title = '') {
+  notification.value = {
+    show: true,
+    type,
+    title,
+    message
+  }
+}
+
+// Функція для закриття нотифікації
+function closeNotification() {
+  notification.value.show = false
+}
 
 // Функція для форматування дати українською
 function formatDateUkrainian(dateStr) {
@@ -393,7 +483,124 @@ onMounted(() => {
       userPhoto.value = user.photoURL || ''
     }
   })
+  // Завантажити список збережених розкладів при монтуванні
+  loadAllSchedules()
 })
+
+// Завантажити всі збережені розклади з бази даних
+async function loadAllSchedules() {
+  try {
+    loadingSchedules.value = true
+    const schedulesQuery = query(collection(db, 'schedules'))
+    const querySnapshot = await getDocs(schedulesQuery)
+    
+    const schedules = []
+    querySnapshot.forEach(doc => {
+      schedules.push({
+        id: doc.id,
+        ...doc.data()
+      })
+    })
+    
+    // Сортуємо за датою початку (найновіші спочатку)
+    savedSchedules.value = schedules.sort((a, b) => {
+      return new Date(b.weekStart) - new Date(a.weekStart)
+    })
+    
+    // Якщо є розклади, встановлюємо індекс на перший (найновіший)
+    if (savedSchedules.value.length > 0) {
+      currentScheduleIndex.value = 0
+    }
+  } catch (error) {
+    console.error('Помилка завантаження розкладів:', error)
+  } finally {
+    loadingSchedules.value = false
+  }
+}
+
+// Отримати поточний розклад
+const currentSavedSchedule = computed(() => {
+  if (savedSchedules.value.length === 0) return null
+  return savedSchedules.value[currentScheduleIndex.value]
+})
+
+// Форматування дати для відображення у пагінації
+function formatDateRange(weekStart, weekEnd) {
+  const start = new Date(weekStart)
+  const end = new Date(weekEnd)
+  
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    return `${day}.${month}`
+  }
+  
+  return `${formatDate(start)} - ${formatDate(end)}`
+}
+
+// Перейти до попереднього розкладу (старіші)
+function goToPreviousSchedule() {
+  if (currentScheduleIndex.value < savedSchedules.value.length - 1) {
+    currentScheduleIndex.value++
+  }
+}
+
+// Перейти до наступного розкладу (новіші)
+function goToNextSchedule() {
+  if (currentScheduleIndex.value > 0) {
+    currentScheduleIndex.value--
+  }
+}
+
+// Завантажити вибраний розклад у форму
+function loadScheduleToForm() {
+  const schedule = currentSavedSchedule.value
+  if (!schedule) return
+  
+  // Завантажуємо дати
+  weekStartDate.value = schedule.weekStart
+  weekEndDate.value = schedule.weekEnd
+  
+  // Очищаємо поточні тренування
+  daysOfWeek.value.forEach(day => {
+    day.trainings = []
+  })
+  
+  // Завантажуємо тренування з розкладу
+  if (schedule.trainings && Array.isArray(schedule.trainings)) {
+    schedule.trainings.forEach(training => {
+      const dayId = getDayIdFromName(training.dayName)
+      const day = daysOfWeek.value.find(d => d.id === dayId)
+      
+      if (day) {
+        day.trainings.push({
+          name: training.name,
+          time: training.time,
+          type: training.type,
+          difficulty: training.difficulty,
+          address: training.address,
+          isPaid: training.isPaid || false
+        })
+      }
+    })
+  }
+  
+  showNotification('success', 'Розклад завантажено у форму! Ви можете редагувати і зберегти його.', 'Успішно')
+}
+
+// Допоміжна функція для отримання ID дня з назви
+function getDayIdFromName(dayName) {
+  const dayMap = {
+    'Понеділок': 'monday',
+    'Вівторок': 'tuesday',
+    'Середа': 'wednesday',
+    'Четвер': 'thursday',
+    "П'ятниця": 'friday',
+    'Субота': 'saturday',
+    'Неділя': 'sunday'
+  }
+  return dayMap[dayName] || 'monday'
+}
 
 // Завантажувати розклад при переключенні на секцію реєстрації
 watch(activeSection, (newSection) => {
@@ -1096,7 +1303,7 @@ const isTrainingPast = (training) => {
 // Реєстрація
 const registerForTraining = async (training) => {
   if (!auth.currentUser) {
-    alert('Будь ласка, увійдіть в систему для реєстрації')
+    showNotification('warning', 'Будь ласка, увійдіть в систему для реєстрації', 'Потрібна авторизація')
     return
   }
   
@@ -1130,7 +1337,7 @@ const registerForTraining = async (training) => {
     
     setTimeout(() => { registrationSuccess.value = '' }, 3000)
   } catch (err) {
-    alert('Помилка реєстрації: ' + err.message)
+    showNotification('error', err.message, 'Помилка реєстрації')
   }
 }
 
@@ -1173,7 +1380,7 @@ const cancelRegistration = async (training) => {
       setTimeout(() => { registrationSuccess.value = '' }, 3000)
     }
   } catch (err) {
-    alert('Помилка скасування: ' + err.message)
+    showNotification('error', err.message, 'Помилка скасування')
   }
 }
 </script>
