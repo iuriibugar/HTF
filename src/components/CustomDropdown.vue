@@ -1,9 +1,10 @@
 <template>
   <div class="relative w-full">
     <input
-      :value="displayValue"
-      @click="showDropdown = true"
-      @focus="showDropdown = true"
+      :value="allowCustom ? inputValue : displayValue"
+      @input="handleInput"
+      @click="handleFocus"
+      @focus="handleFocus"
       @blur="hideDropdown"
       :placeholder="placeholder"
       :class="[
@@ -11,13 +12,13 @@
         hasError ? 'border-red-500' : 'border-gray-300'
       ]"
       autocomplete="off"
-      readonly
+      :readonly="!allowCustom"
     />
     <button type="button" @mousedown.prevent="showDropdown = true" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 pointer-events-none">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
     </button>
     <ul v-if="showDropdown" class="absolute left-0 right-0 z-20 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto mt-1">
-      <li v-for="(option, idx) in options" :key="idx"
+      <li v-for="(option, idx) in filteredOptions" :key="idx"
           @mousedown.prevent="selectOption(option)"
           :class="[
             'px-3 py-2 cursor-pointer transition',
@@ -25,18 +26,25 @@
           ]">
         {{ getLabel(option) }}
       </li>
+      <li v-if="allowCustom && filteredOptions.length === 0" class="px-3 py-2 text-gray-400 text-sm">
+        Введіть власне значення
+      </li>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   modelValue: String,
   options: Array, // Can be ['option1', 'option2'] or [{value: 'val', label: 'Label'}]
   placeholder: String,
   hasError: {
+    type: Boolean,
+    default: false
+  },
+  allowCustom: {
     type: Boolean,
     default: false
   }
@@ -79,6 +87,40 @@ function selectOption(option) {
 }
 
 const emit = defineEmits(['update:modelValue'])
+
+const inputValue = ref(displayValue.value)
+
+// Фільтровані опції при введенні
+const filteredOptions = computed(() => {
+  if (!props.allowCustom) return props.options
+  // Якщо inputValue співпадає з displayValue (не змінено), показуємо всі опції
+  if (inputValue.value === displayValue.value) return props.options
+  // Якщо порожнє, показуємо всі
+  if (!inputValue.value) return props.options
+  // Інакше фільтруємо
+  const search = inputValue.value.toLowerCase()
+  return props.options.filter(opt => {
+    const label = getLabel(opt).toLowerCase()
+    return label.includes(search)
+  })
+})
+
+// Оновлюємо inputValue коли змінюється modelValue ззовні
+watch(() => props.modelValue, () => {
+  inputValue.value = displayValue.value
+})
+
+function handleFocus() {
+  showDropdown.value = true
+}
+
+function handleInput(event) {
+  if (!props.allowCustom) return
+  inputValue.value = event.target.value
+  showDropdown.value = false
+  // Якщо дозволено кастомний ввід, оновлюємо modelValue при введенні
+  emit('update:modelValue', event.target.value)
+}
 </script>
 
 <style scoped>
