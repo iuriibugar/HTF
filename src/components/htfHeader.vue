@@ -59,16 +59,16 @@ async function logout() {
 
         <!-- Меню -->
         <ul class="flex flex-wrap justify-center space-x-4 text-sm md:text-base">
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Пробний період</a></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Членство</a></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Тренувальні програми</a></li>
-            <li><router-link to="/schedule" class="menu-link font-bold hover:text-yellow-400">Розклад</router-link></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Види спорту</a></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Календар</a></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Про нас</a></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Допомога ЗСУ</a></li>
-            <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Клубний мерч</a></li>
-            <li><router-link v-if="!isAuthenticated" to="/login" class="menu-link font-bold hover:text-yellow-400">Логін</router-link></li>
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Пробний період</a></li> -->
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Членство</a></li> -->
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Тренувальні програми</a></li> -->
+            <li><router-link to="/schedule" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Розклад</router-link></li>
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Види спорту</a></li> -->
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Календар</a></li> -->
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Про нас</a></li> -->
+            <li><router-link to="/donations" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Допомога ЗСУ</router-link></li>
+            <!-- <li><a href="#" class="menu-link font-bold hover:text-yellow-400">Клубний мерч</a></li> -->
+            <li><router-link v-if="!isAuthenticated" to="/login" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Логін</router-link></li>
         </ul>
 
         <!-- Кнопки -->

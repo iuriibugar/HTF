@@ -160,8 +160,7 @@ import Header from '../components/htfHeader.vue'
 import { db } from '../firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { getTrainingIcon } from '../data/trainingConfig.js'
-
-const backgroundImage = '/HTF/bg.jpg'
+import backgroundImage from '@/assets/background.png'
 const loading = ref(true)
 const schedule = ref(null)
 const registrations = ref([])

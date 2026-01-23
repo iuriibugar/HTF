@@ -1,9 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import MainPage from '../views/MainPage.vue'
 import LoginView from '../views/LoginView.vue'
-import UserView from '../views/UserView.vue'
-import AdminView from '../views/AdminView.vue'
+import CabinetView from '../views/CabinetView.vue'
 import ScheduleView from '../views/ScheduleView.vue'
+import DonationsView from '../views/DonationsView.vue'
 import { auth } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 
@@ -26,16 +26,27 @@ const router = createRouter({
       component: ScheduleView,
     },
     {
+      path: '/donations',
+      name: 'donations',
+      component: DonationsView,
+    },
+    {
       path: '/user',
       name: 'user',
-      component: UserView,
+      component: CabinetView,
       meta: { requiresAuth: true }
     },
     {
       path: '/admin',
       name: 'admin',
-      component: AdminView,
+      component: CabinetView,
       meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/cabinet',
+      name: 'cabinet',
+      component: CabinetView,
+      meta: { requiresAuth: true }
     },
   ],
 })
