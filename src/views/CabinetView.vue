@@ -149,7 +149,10 @@ onMounted(() => {
       userPhoto.value = user.photoURL || ''
       
       // Перевірка чи користувач адмін (за email)
-      const adminEmails = ['bugary20@gmail.com'] // Додайте інші email адмінів
+      const adminEmails = [
+        'kulikalovdenis@gmail.com',
+        'bugary20@gmail.com',
+      ] // Додайте інші email адмінів
       isAdmin.value = adminEmails.includes(user.email)
       
       // Встановлюємо початкову секцію
