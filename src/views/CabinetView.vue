@@ -15,16 +15,15 @@
     <!-- Весь контент -->
     <div class="relative z-10 h-full flex flex-col">
       <!-- Хедер -->
-      <div class="bg-gray-800">
-        <Header />
-      </div>
+      <HeaderWrapper />
 
       <!-- Основний контент з боковою панеллю -->
       <div class="flex flex-col lg:flex-row gap-2 lg:gap-4 p-2 sm:p-4 flex-1 min-h-0 overflow-y-auto">
         <!-- Бокова панель меню -->
-        <aside class="w-full lg:w-80 bg-white bg-opacity-90 rounded-2xl shadow-lg p-2 sm:p-4 flex-shrink-0 overflow-y-auto flex flex-col mb-2 lg:mb-0">
+<aside
+  class="w-full lg:w-80 bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-lg p-2 sm:p-4 flex-shrink-0 overflow-y-auto flex flex-col mb-2 lg:mb-0">
           <!-- Інформація про користувача -->
-          <div class="flex flex-col items-center mb-6 pb-6 border-b border-gray-200">
+          <div class="flex flex-col items-center mb-6 pb-6 border-b border-gray-400">
             <!-- Аватар користувача -->
             <div v-if="userPhoto" class="w-20 h-20 rounded-full mb-3 shadow-md overflow-hidden bg-gray-200">
               <img :src="userPhoto" :alt="userName" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
@@ -34,44 +33,44 @@
             </div>
             
             <div class="flex items-center justify-center gap-2 w-full">
-              <p class="font-semibold text-gray-800 text-center">{{ userName || 'Користувач' }}</p>
+              <p class="font-semibold text-yellow-400 text-center">{{ userName || 'Користувач' }}</p>
               <button 
                 @click="logout" 
-                class="bg-gray-200 hover:bg-gray-300 p-1.5 rounded transition flex-shrink-0 border border-red-500"
+                class="bg-transparent border-2 border-yellow-400 text-yellow-400 p-1.5 rounded transition flex-shrink-0 hover:border-white hover:text-white"
                 title="Вийти">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
                 </svg>
               </button>
             </div>
-            <p class="text-sm text-gray-500 text-center break-all">{{ userEmail }}</p>
+            <p class="text-sm text-yellow-400 text-center break-all">{{ userEmail }}</p>
           </div>
 
           <!-- Блок Адміна (тільки для адмінів) -->
           <div v-if="isAdmin" class="mb-6">
-            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">Адміністрування</h3>
+            <h3 class="text-sm font-bold text-yellow-400 uppercase mb-3">Адміністрування</h3>
             <button 
-              @click="activeSection = 'form-schedule'"
-              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition flex items-center gap-2', 
-                       activeSection === 'form-schedule' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700']">
-              <span :class="activeSection === 'form-schedule' ? 'text-white' : 'text-red-500'">📅</span>
+              @click="router.push('/admin/schedule')"
+              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition flex items-center gap-2 border-2 border-white text-white', 
+                       activeSection === 'form-schedule' ? 'bg-yellow-400 text-black border-yellow-400' : 'hover:border-yellow-400 hover:text-yellow-400']">
+              <span>📅</span>
               <span>Сформувати розклад</span>
             </button>
             <button 
-              @click="activeSection = 'donations-manager'"
-              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition', 
-                       activeSection === 'donations-manager' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 text-gray-700']">
-              💰 Управління донатами
+              @click="router.push('/admin/donations')"
+              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition border-2 border-white text-white', 
+                       activeSection === 'donations-manager' ? 'bg-yellow-400 text-black border-yellow-400' : 'hover:border-yellow-400 hover:text-yellow-400']">
+              <span>💰 Управління донатами</span>
             </button>
           </div>
           
           <!-- Блок для всіх -->
           <div>
-            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">Загальне</h3>
+            <h3 class="text-sm font-bold text-yellow-400 uppercase mb-3">Загальне</h3>
             <button 
-              @click="activeSection = 'training-registration'"
-              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition', 
-                       activeSection === 'training-registration' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 text-gray-700']">
+              @click="router.push('/user/registration')"
+              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition border-2 border-white text-white', 
+                       activeSection === 'training-registration' ? 'bg-yellow-400 text-black border-yellow-400' : 'hover:border-yellow-400 hover:text-yellow-400']">
               ✍️ Реєстрація на тренування
             </button>
           </div>
@@ -92,15 +91,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { auth } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
-import Header from '../components/htfHeader.vue'
+import { useRoute, useRouter } from 'vue-router'
+import HeaderWrapper from '../components/HeaderWrapper.vue'
 import NotificationComponent from '../components/Notification.vue'
 import FormSchedule from './cabinet/admin/FormSchedule.vue'
 import DonationsManager from './cabinet/admin/DonationsManager.vue'
 import TrainingRegistration from './cabinet/user/TrainingRegistration.vue'
 import backgroundImage from '@/assets/background.png'
+
+const route = useRoute()
+const router = useRouter()
+const props = defineProps({
+  section: String
+})
 
 const userName = ref('')
 const userEmail = ref('')
@@ -141,6 +147,21 @@ const currentComponent = computed(() => {
   return components[activeSection.value] || TrainingRegistration
 })
 
+// Стежимо за параметром маршруту
+watch(() => route.path, () => {
+  if (route.path === '/user/registration' || route.path.includes('/user')) {
+    activeSection.value = 'training-registration'
+  } else if (route.path === '/admin/schedule') {
+    activeSection.value = 'form-schedule'
+  } else if (route.path === '/admin/donations') {
+    activeSection.value = 'donations-manager'
+  } else if (route.path.includes('/admin')) {
+    activeSection.value = 'form-schedule'
+  } else {
+    activeSection.value = 'training-registration'
+  }
+}, { immediate: true })
+
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -155,9 +176,17 @@ onMounted(() => {
       ] // Додайте інші email адмінів
       isAdmin.value = adminEmails.includes(user.email)
       
-      // Встановлюємо початкову секцію
-      if (isAdmin.value) {
+      // Встановлюємо початкову секцію залежно від маршруту
+      if (route.path === '/user/registration' || route.path.includes('/user')) {
+        activeSection.value = 'training-registration'
+      } else if (route.path === '/admin/schedule') {
         activeSection.value = 'form-schedule'
+      } else if (route.path === '/admin/donations') {
+        activeSection.value = 'donations-manager'
+      } else if (route.path.includes('/admin') && isAdmin.value) {
+        activeSection.value = 'form-schedule'
+      } else {
+        activeSection.value = 'training-registration'
       }
     }
   })

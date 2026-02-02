@@ -1,5 +1,6 @@
 <script setup>
-import Header from '../components/htfHeader.vue';
+import HeaderWrapper from '../components/HeaderWrapper.vue';
+import Footer from '../components/htfFooter.vue';
 import HomeView from './HomeView.vue';
 import backgroundImage from '@/assets/background.png'
 import foundersImage from '@/assets/main/founders_HTF.png'
@@ -23,7 +24,7 @@ function scrollDown() {
 
         <!-- Контент -->
         <div class="relative z-10">
-            <Header />
+            <HeaderWrapper />
             <main class="text-center p-4 sm:p-6 md:p-10 lg:p-40">
                 <HomeView />
             </main>
@@ -65,6 +66,8 @@ function scrollDown() {
             <p class="text-sm sm:text-base md:text-lg">Досвідчений наставник з багаторічним стажем у сфері спорту. Денис допомагає учасникам розвивати навички, надихає на досягнення та веде команду до нових висот у світі аматорського триатлону.</p>
         </div>
     </div>
+
+    <Footer />
 </template>
 
 <style scoped></style>

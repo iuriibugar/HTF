@@ -17,20 +17,20 @@
     <!-- Slot для форми -->
     <template #form>
       <!-- Завантаження зображення -->
-      <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition">
+      <div class="border-2 border-dashed border-white rounded-xl p-6 text-center hover:border-yellow-400 transition bg-gray-700/50">
         <div v-if="imagePreview" class="mb-4">
           <img :src="imagePreview" alt="Preview" class="max-h-64 mx-auto rounded-lg shadow-md" />
           <button 
             @click="removeImage"
-            class="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition">
+            class="mt-4 px-4 py-2 border-2 border-white text-white rounded-lg transition hover:border-red-400 hover:text-red-400">
             ❌ Видалити зображення
           </button>
         </div>
         <div v-else>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-white mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <p class="text-gray-600 mb-2">Завантажте зображення (PNG)</p>
+          <p class="text-white mb-2">Завантажте зображення (PNG)</p>
           <input 
             ref="fileInput"
             type="file" 
@@ -39,7 +39,7 @@
             class="hidden" />
           <button 
             @click="$refs.fileInput.click()"
-            class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+            class="px-6 py-3 border-2 border-white text-white rounded-lg transition">
             📁 Вибрати файл
           </button>
         </div>
@@ -47,38 +47,38 @@
       
       <!-- Назва -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Назва *</label>
+        <label class="block text-sm font-semibold text-white mb-2">Назва *</label>
         <input 
           v-model="formData.title"
           type="text"
           placeholder="Наприклад: Підтримка ЗСУ"
-          :class="['w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                   errors.title ? 'border-red-500' : 'border-gray-300']" />
-        <p v-if="errors.title" class="text-red-600 text-sm mt-1">⚠️ {{ errors.title }}</p>
+          :class="['w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
+                   errors.title ? 'border-red-500' : 'border-white']" />
+        <p v-if="errors.title" class="text-yellow-400 text-sm mt-1 font-semibold">⚠️ {{ errors.title }}</p>
       </div>
       
       <!-- Опис -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Опис *</label>
+        <label class="block text-sm font-semibold text-white mb-2">Опис *</label>
         <textarea 
           v-model="formData.description"
           rows="4"
           placeholder="Опишіть мету донатів..."
-          :class="['w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                   errors.description ? 'border-red-500' : 'border-gray-300']"></textarea>
-        <p v-if="errors.description" class="text-red-600 text-sm mt-1">⚠️ {{ errors.description }}</p>
+          :class="['w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
+                   errors.description ? 'border-red-500' : 'border-white']"></textarea>
+        <p v-if="errors.description" class="text-yellow-400 text-sm mt-1 font-semibold">⚠️ {{ errors.description }}</p>
       </div>
       
       <!-- Посилання -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Посилання на донат *</label>
+        <label class="block text-sm font-semibold text-white mb-2">Посилання на донат *</label>
         <input 
           v-model="formData.link"
           type="url"
           placeholder="https://send.monobank.ua/..."
-          :class="['w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                   errors.link ? 'border-red-500' : 'border-gray-300']" />
-        <p v-if="errors.link" class="text-red-600 text-sm mt-1">⚠️ {{ errors.link }}</p>
+          :class="['w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
+                   errors.link ? 'border-red-500' : 'border-white']" />
+        <p v-if="errors.link" class="text-yellow-400 text-sm mt-1 font-semibold">⚠️ {{ errors.link }}</p>
       </div>
     </template>
   </ItemsManager>

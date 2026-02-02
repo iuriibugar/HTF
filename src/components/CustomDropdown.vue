@@ -8,21 +8,21 @@
       @blur="hideDropdown"
       :placeholder="placeholder"
       :class="[
-        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none cursor-pointer placeholder-gray-400 text-gray-900',
-        hasError ? 'border-red-500' : 'border-gray-300'
+        'w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 appearance-none cursor-pointer placeholder-gray-400 transition',
+        hasError ? 'border-red-500' : modelValue ? 'border-yellow-400 bg-yellow-400 text-black font-semibold' : 'border-white text-white bg-gray-700 hover:border-yellow-400'
       ]"
       autocomplete="off"
       :readonly="!allowCustom"
     />
-    <button type="button" @mousedown.prevent="showDropdown = true" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 pointer-events-none">
+    <button type="button" @mousedown.prevent="showDropdown = true" class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none transition" :class="modelValue ? 'text-black' : 'text-white hover:text-yellow-400'">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
     </button>
-    <ul v-if="showDropdown" class="absolute left-0 right-0 z-20 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto mt-1">
+    <ul v-if="showDropdown" class="absolute left-0 right-0 z-20 border-2 border-white rounded-lg shadow-lg max-h-48 overflow-auto mt-1 bg-gray-800">
       <li v-for="(option, idx) in filteredOptions" :key="idx"
           @mousedown.prevent="selectOption(option)"
           :class="[
-            'px-3 py-2 cursor-pointer transition',
-            getValue(option) === modelValue ? 'bg-green-500 text-white font-semibold' : 'hover:bg-gray-100'
+            'px-3 py-2 cursor-pointer transition border-b border-gray-700 text-white hover:bg-yellow-400 hover:text-black',
+            getValue(option) === modelValue ? 'bg-yellow-400 text-black font-semibold' : ''
           ]">
         {{ getLabel(option) }}
       </li>
@@ -129,29 +129,26 @@ ul {
   margin: 0;
   padding: 0;
   border: none;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   border-radius: 0.75rem;
-  background: #fff;
+  background: #1f2937;
   transition: box-shadow 0.2s;
 }
 li {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #374151;
   transition: background 0.15s;
 }
 li:last-child {
   border-bottom: none;
 }
-li:hover {
-  background: #e0f2fe;
-}
 input {
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px #60a5fa33;
+  border-color: #facc15;
+  box-shadow: 0 0 0 2px #fef08a33;
 }
 button {
   background: none;
@@ -162,6 +159,6 @@ button {
 }
 button:focus {
   outline: none;
-  color: #2563eb;
+  color: #facc15;
 }
 </style>

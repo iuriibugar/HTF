@@ -37,10 +37,31 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/user/registration',
+      name: 'user-registration',
+      component: CabinetView,
+      meta: { requiresAuth: true },
+      props: { section: 'training-registration' }
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: CabinetView,
       meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/schedule',
+      name: 'admin-schedule',
+      component: CabinetView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      props: { section: 'form-schedule' }
+    },
+    {
+      path: '/admin/donations',
+      name: 'admin-donations',
+      component: CabinetView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      props: { section: 'donations-manager' }
     },
     {
       path: '/cabinet',

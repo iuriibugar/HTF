@@ -1,152 +1,142 @@
 <template>
   <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${backgroundImage})` }">
     <!-- Затемнення фону -->
-    <div class="absolute inset-0 bg-black opacity-40"></div>
+    <div class="absolute inset-0 bg-black opacity-50"></div>
 
     <!-- Весь контент -->
     <div class="relative z-10 min-h-screen flex flex-col">
       <!-- Хедер -->
-      <div class="bg-gray-800">
-        <Header />
-      </div>
+      <HeaderWrapper />
 
       <!-- Основний контент -->
       <div class="flex-1 p-2 sm:p-4 md:p-8">
         <div class="max-w-6xl mx-auto">
           <!-- Заголовок -->
-          <div class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-2 sm:p-4 md:p-8 mb-4 sm:mb-6">
-            <h1 class="text-4xl font-bold text-gray-800 text-center mb-2 flex items-center justify-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-              </svg>
+          <div class="mb-2 sm:mb-4">
+            <h1 class="text-lg sm:text-2xl font-bold text-yellow-400 text-center mb-1 flex items-center justify-center gap-2">
+              <span>📅</span>
               Розклад тренувань
             </h1>
-            <p class="text-center text-gray-600" v-if="schedule">
+            <p class="text-center text-white text-xs sm:text-sm" v-if="schedule">
               {{ formatDate(schedule.weekStart) }} - {{ formatDate(schedule.weekEnd) }}
             </p>
           </div>
 
           <!-- Завантаження -->
-          <div v-if="loading" class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-4 sm:p-8 md:p-12 text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Завантаження розкладу...</p>
+          <div v-if="loading" class="bg-gray-800/50 backdrop-blur-md rounded-xl shadow-lg p-4 sm:p-8 text-center border-2 border-yellow-400">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-2"></div>
+            <p class="text-white text-sm">Завантаження розкладу...</p>
           </div>
 
           <!-- Немає розкладу -->
-          <div v-else-if="!schedule || !schedule.trainings || schedule.trainings.length === 0" class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-4 sm:p-8 md:p-12 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div v-else-if="!schedule || !schedule.trainings || schedule.trainings.length === 0" class="bg-gray-800/50 backdrop-blur-md rounded-xl shadow-lg p-4 sm:p-8 text-center border-2 border-yellow-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <p class="text-gray-600 text-xl mb-4">Розклад на поточний тиждень ще не створений</p>
-            <p class="text-gray-500">Очікуйте оновлення від адміністратора</p>
+            <p class="text-white text-sm font-bold mb-1">Розклад ще не створений</p>
+            <p class="text-gray-400 text-xs">Очікуйте оновлення від адміністратора</p>
           </div>
 
           <!-- Список тренувань -->
-          <div v-else class="space-y-2 sm:space-y-4">
-            <!-- Група по днях -->
-            <div 
-              v-for="(dayTrainings, dayName) in groupedTrainings" 
-              :key="dayName"
-              class="flex flex-col sm:flex-row gap-2 sm:gap-4"
-            >
-              <!-- День тижня зліва -->
-              <div class="w-full sm:w-32 flex-shrink-0">
-                <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-2 sm:p-4 text-center sticky top-4">
-                  <h2 class="text-base sm:text-lg font-bold text-white">
-                    {{ dayName }}
-                  </h2>
-                </div>
+          <div v-else class="space-y-4 sm:space-y-6">
+            <div v-for="(dayTrainings, dayName) in groupedTrainings" :key="dayName" class="border-2 border-yellow-400 rounded-xl overflow-hidden">
+              <!-- Заголовок дня -->
+              <div class="bg-gray-700/70 text-white px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-yellow-400 flex items-center justify-between">
+                <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">{{ dayName }}</h2>
+                <p class="text-sm text-gray-300">{{ formatDate(dayTrainings[0].date) }}</p>
               </div>
-
+              
               <!-- Тренування -->
-              <div class="flex-1 space-y-3">
+              <div class="p-2 sm:p-4 space-y-3 sm:space-y-4 bg-gray-700/50">
                 <div 
                   v-for="(training, idx) in dayTrainings" 
                   :key="idx"
-                  class="bg-white bg-opacity-95 rounded-lg shadow-md border border-gray-200"
+                  class="p-3 sm:p-4 bg-gray-800 rounded-lg border-2 border-yellow-400"
                 >
-                  <!-- Основна інформація про тренування -->
-                  <div class="p-4">
-                    <div class="flex items-start justify-between gap-4">
-                      <!-- Ліва частина: основна інформація -->
-                      <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
-                          <span class="text-2xl">{{ getTypeEmoji(training.type) }}</span>
-                          <h3 class="text-lg font-bold text-gray-800">{{ training.name }}</h3>
-                          <span 
-                            :class="[
-                              'px-2 py-0.5 rounded-full text-xs font-semibold',
-                              getDifficultyColor(training.difficulty)
-                            ]"
-                          >
-                            {{ training.difficulty }}
-                          </span>
-                          <span 
-                            v-if="training.isPaid"
-                            class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800"
-                          >
-                            💰
-                          </span>
-                        </div>
-                        
-                        <div class="flex items-center gap-4 text-sm text-gray-600">
-                          <div class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="font-semibold">{{ training.time }}</span>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="text-xs">{{ training.address }}</span>
-                          </div>
-                          <span class="text-xs">{{ training.type }}</span>
-                        </div>
-                      </div>
-
-                      <!-- Права частина: реєстрації -->
-                      <div class="flex-shrink-0">
-                        <button 
-                          @click="toggleParticipants(training)"
-                          class="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+                  <!-- Верхня частина: інформація + кнопка -->
+                  <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+                    <!-- Ліва частина: інформація про тренування -->
+                    <div class="flex-1 w-full">
+                      <!-- Назва, складність, оплата -->
+                      <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        <span class="text-lg">{{ getTypeEmoji(training.type) }}</span>
+                        <h3 class="text-base sm:text-lg font-bold text-yellow-400">{{ training.name }}</h3>
+                        <span 
+                          :class="[
+                            'px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold',
+                            getDifficultyColor(training.difficulty)
+                          ]"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                          </svg>
-                          <span class="font-semibold text-gray-800">{{ getRegistrationCount(training) }}</span>
-                          <span class="text-gray-500 text-xs">
-                            {{ isParticipantsVisible(training) ? '▼' : '▶' }}
-                          </span>
-                        </button>
+                          {{ training.difficulty }}
+                        </span>
+                        <span 
+                          v-if="training.isPaid"
+                          class="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold bg-yellow-400 text-black"
+                        >
+                          💰 Платне
+                        </span>
+                      </div>
+                      
+                      <!-- Час, адреса, тип -->
+                      <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-300 text-xs sm:text-sm">
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                          <span>⏰</span>
+                          <span class="font-semibold">{{ training.time }}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                          <span>📍</span>
+                          <span>{{ training.address }}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                          <span>🏃</span>
+                          <span>{{ training.type }}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Список учасників (компактний) -->
-                    <div 
-                      v-if="isParticipantsVisible(training)" 
-                      class="mt-3 pt-3 border-t border-gray-200"
-                    >
-                      <div v-if="getRegistrations(training).length === 0" class="text-center text-gray-400 text-sm py-2">
-                        Немає реєстрацій
-                      </div>
-                      <div v-else class="space-y-1">
-                        <div 
-                          v-for="(registration, regIdx) in getRegistrations(training)" 
-                          :key="regIdx"
-                          class="text-sm text-gray-700 py-1"
-                        >
-                          <span class="font-medium">{{ registration.userName }}</span>
-                          <span class="text-gray-400 mx-1">·</span>
-                          <span class="text-xs text-gray-500">{{ formatRegistrationTime(registration.registeredAt) }}</span>
-                        </div>
+                    <!-- Кнопка реєстрацій (фіксована вгорі справа) -->
+                    <div class="flex-shrink-0 w-full sm:w-auto">
+                      <button 
+                        @click="toggleParticipants(training)"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg transition-colors text-xs sm:text-sm font-semibold text-black"
+                      >
+                        <span>👥</span>
+                        <span>{{ getRegistrationCount(training) }}</span>
+                        <span class="text-xs">
+                          {{ isParticipantsVisible(training) ? '▼' : '▶' }}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Список учасників (розгортається внизу, окремо) -->
+                  <div 
+                    v-if="isParticipantsVisible(training)" 
+                    class="border-t border-gray-600 mt-3 pt-3"
+                  >
+                    <div v-if="getRegistrations(training).length === 0" class="text-center text-gray-400 text-xs py-2">
+                      Немає реєстрацій
+                    </div>
+                    <div v-else class="space-y-2">
+                      <div 
+                        v-for="(registration, regIdx) in getRegistrations(training)" 
+                        :key="regIdx"
+                        class="text-xs text-white"
+                      >
+                        <span class="font-medium">{{ registration.userName }}</span>
+                        <span class="text-gray-400 mx-1">·</span>
+                        <span class="text-gray-500">{{ formatRegistrationTime(registration.registeredAt) }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Футер -->
+          <div class="mt-4">
+            <Footer />
           </div>
         </div>
       </div>
@@ -156,7 +146,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import Header from '../components/htfHeader.vue'
+import HeaderWrapper from '../components/HeaderWrapper.vue'
+import Footer from '../components/htfFooter.vue'
 import { db } from '../firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { getTrainingIcon } from '../data/trainingConfig.js'
@@ -236,11 +227,11 @@ const getUserInitial = (userName) => {
 // Колір для складності
 const getDifficultyColor = (difficulty) => {
   const colorMap = {
-    'Легка': 'bg-green-100 text-green-800',
-    'Середня': 'bg-yellow-100 text-yellow-800',
-    'Важка': 'bg-red-100 text-red-800'
+    'Легка': 'bg-green-500 text-white',
+    'Середня': 'bg-yellow-400 text-black',
+    'Важка': 'bg-red-500 text-white'
   }
-  return colorMap[difficulty] || 'bg-gray-100 text-gray-800'
+  return colorMap[difficulty] || 'bg-gray-500 text-white'
 }
 
 // Отримати ID тренування
