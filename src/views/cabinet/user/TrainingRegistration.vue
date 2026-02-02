@@ -50,7 +50,7 @@
                 <span>{{ training.address }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>🏃</span>
+                <img :src="getTrainingImage(training.type)" :alt="training.type" class="w-5 h-5 object-contain" />
                 <span>{{ training.type }}</span>
               </div>
             </div>
@@ -68,7 +68,7 @@
               <!-- Можна зареєструватись -->
               <button 
                 v-else-if="!isRegistered(training)"
-                @click="registerForTraining(training)"
+                @click="registerForTrainingHandler(training)"
                 class="w-full px-4 py-3 rounded-lg font-semibold border-2 border-white text-white hover:border-yellow-400 hover:text-yellow-400 transition-colors">
                 📝 Зареєструватися
               </button>
@@ -81,7 +81,7 @@
                 </button>
                 <button 
                   v-if="!isTrainingPast(training)"
-                  @click="cancelRegistration(training)"
+                  @click="cancelRegistrationHandler(training)"
                   class="w-full px-4 py-2 rounded-lg font-semibold border-2 border-white text-white hover:border-red-400 hover:text-red-400 transition-colors">
                   ❌ Відмінити
                 </button>
@@ -112,7 +112,7 @@
                   <span>{{ training.address }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span>🏃</span>
+                  <img :src="getTrainingImage(training.type)" :alt="training.type" class="w-5 h-5 object-contain" />
                   <span>{{ training.type }}</span>
                 </div>
               </div>
@@ -122,28 +122,28 @@
               <button 
                 v-if="isTrainingPast(training) && !isRegistered(training)"
                 disabled
-                class="px-10 py-2 rounded font-semibold text-sm bg-gray-600 text-gray-400 cursor-not-allowed opacity-60 whitespace-nowrap">
+                class="px-8 py-2 rounded font-semibold text-sm bg-gray-600 text-gray-400 cursor-not-allowed opacity-60 whitespace-nowrap">
                 🕐 Тренування минуло
               </button>
               
               <!-- Можна зареєструватись -->
               <button 
                 v-else-if="!isRegistered(training)"
-                @click="registerForTraining(training)"
-                class="px-10 py-2 rounded font-semibold text-sm transition-all border-2 border-white text-white hover:border-yellow-400 hover:text-yellow-400 whitespace-nowrap">
+                @click="registerForTrainingHandler(training)"
+                class="px-8 py-2 rounded font-semibold text-sm transition-all border-2 border-white text-white hover:border-yellow-400 hover:text-yellow-400 whitespace-nowrap">
                 📝 Записатися
               </button>
               
               <!-- Вже зареєстрований -->
               <template v-else>
                 <button 
-                  class="px-10 py-2 rounded font-semibold text-sm bg-yellow-400 text-black cursor-default whitespace-nowrap">
+                  class="px-8 py-2 rounded font-semibold text-sm bg-yellow-400 text-black cursor-default whitespace-nowrap">
                   ✅ Зареєстровано
                 </button>
                 <button 
                   v-if="!isTrainingPast(training)"
-                  @click="cancelRegistration(training)"
-                  class="px-10 py-2 rounded font-semibold text-sm border-2 border-white text-white hover:border-red-400 hover:text-red-400 transition-colors whitespace-nowrap">
+                  @click="cancelRegistrationHandler(training)"
+                  class="px-8 py-2 rounded font-semibold text-sm border-2 border-white text-white hover:border-red-400 hover:text-red-400 transition-colors whitespace-nowrap">
                   ❌ Відмінити
                 </button>
               </template>
@@ -162,9 +162,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { auth, db } from '@/firebase'
-import { collection, addDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore'
+import { auth } from '@/firebase'
 import { getTrainingIcon } from '@/data/trainingConfig'
+import { getScheduleForWeek } from '@/services/scheduleService'
+import { registerForTraining, getUserRegistrations, cancelRegistration } from '@/services/registrationService'
 
 // Props
 const props = defineProps({
@@ -236,14 +237,26 @@ const getTypeEmoji = (type) => {
 
 // Отримати картинку для типу тренування
 const getTrainingImage = (type) => {
+  // Маппінг для українських назв та англійських ключів
   const iconMap = {
     'swimming': new URL('@/assets/trainingIcons/icon-swimming.png', import.meta.url).href,
     'running': new URL('@/assets/trainingIcons/icon-running.png', import.meta.url).href,
     'cycling': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
-    'other': new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href
+    'other': new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href,
+    // Українські назви
+    'плавання': new URL('@/assets/trainingIcons/icon-swimming.png', import.meta.url).href,
+    'біг': new URL('@/assets/trainingIcons/icon-running.png', import.meta.url).href,
+    'велосипед': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
+    'велотренування': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
+    'інше': new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href
   }
-  const key = type.toLowerCase()
-  return iconMap[key] || iconMap['other']
+  
+  if (!type) return iconMap['other']
+  
+  const lowerType = String(type).toLowerCase().trim()
+
+  
+  return iconMap[lowerType] || iconMap['other']
 }
 
 // Колір складності
@@ -261,37 +274,15 @@ const loadScheduleForRegistration = async () => {
   try {
     loadingSchedule.value = true
     const { monday, sunday } = getCurrentWeekDates()
-    const mondayStr = monday.toISOString().split('T')[0]
-    const sundayStr = sunday.toISOString().split('T')[0]
     
-    const allSchedulesQuery = query(collection(db, 'schedules'))
-    const allSchedulesSnapshot = await getDocs(allSchedulesQuery)
+    const schedule = await getScheduleForWeek(monday, sunday)
+    currentSchedule.value = schedule
     
-    const validSchedules = []
-    allSchedulesSnapshot.forEach(doc => {
-      const data = doc.data()
-      const scheduleStart = data.weekStart
-      const scheduleEnd = data.weekEnd
-      
-      if (scheduleStart >= mondayStr && scheduleEnd <= sundayStr) {
-        validSchedules.push({ id: doc.id, ...data })
-      }
-    })
-    
-    if (validSchedules.length > 0) {
-      validSchedules.sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0)
-        const dateB = new Date(b.createdAt || 0)
-        return dateB - dateA
-      })
-      
-      currentSchedule.value = validSchedules[0]
+    if (schedule) {
       await loadUserRegistrationsForAdmin()
-    } else {
-      currentSchedule.value = null
     }
   } catch (err) {
-    console.error('❌ Помилка завантаження:', err)
+    console.error('Помилка завантаження:', err)
   } finally {
     loadingSchedule.value = false
   }
@@ -301,9 +292,8 @@ const loadScheduleForRegistration = async () => {
 const loadUserRegistrationsForAdmin = async () => {
   if (!auth.currentUser) return
   try {
-    const q = query(collection(db, 'registrations'), where('userId', '==', auth.currentUser.uid))
-    const querySnapshot = await getDocs(q)
-    userRegistrations.value = querySnapshot.docs.map(doc => doc.data().trainingId)
+    const registrations = await getUserRegistrations(auth.currentUser.uid)
+    userRegistrations.value = registrations
   } catch (err) {
     // Тиха помилка
   }
@@ -327,7 +317,7 @@ const isTrainingPast = (training) => {
 }
 
 // Реєстрація
-const registerForTraining = async (training) => {
+const registerForTrainingHandler = async (training) => {
   if (!auth.currentUser) {
     showNotification('warning', 'Будь ласка, увійдіть в систему для реєстрації', 'Потрібна авторизація')
     return
@@ -337,18 +327,13 @@ const registerForTraining = async (training) => {
     const trainingId = `${currentSchedule.value.id}_${training.date}_${training.time}`
     if (isRegistered(training)) return
     
-    await addDoc(collection(db, 'registrations'), {
-      userId: auth.currentUser.uid,
-      userEmail: auth.currentUser.email,
-      userName: auth.currentUser.displayName || auth.currentUser.email,
-      userPhoto: auth.currentUser.photoURL || null,
+    await registerForTraining({
       trainingId,
       scheduleId: currentSchedule.value.id,
       trainingDate: training.date,
       trainingTime: training.time,
       trainingName: training.name,
-      trainingType: training.type,
-      registeredAt: new Date().toISOString()
+      trainingType: training.type
     })
     
     userRegistrations.value.push(trainingId)
@@ -361,24 +346,15 @@ const registerForTraining = async (training) => {
 }
 
 // Відміна реєстрації
-const cancelRegistration = async (training) => {
+const cancelRegistrationHandler = async (training) => {
   if (!auth.currentUser) return
   
   try {
     const trainingId = `${currentSchedule.value.id}_${training.date}_${training.time}`
     
-    const q = query(
-      collection(db, 'registrations'),
-      where('userId', '==', auth.currentUser.uid),
-      where('trainingId', '==', trainingId)
-    )
+    const success = await cancelRegistration(auth.currentUser.uid, trainingId)
     
-    const querySnapshot = await getDocs(q)
-    
-    if (!querySnapshot.empty) {
-      const docToDelete = querySnapshot.docs[0]
-      await deleteDoc(docToDelete.ref)
-      
+    if (success) {
       const index = userRegistrations.value.indexOf(trainingId)
       if (index > -1) {
         userRegistrations.value.splice(index, 1)

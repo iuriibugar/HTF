@@ -220,10 +220,10 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { auth, db } from '@/firebase'
-import { collection, addDoc, query, getDocs } from 'firebase/firestore'
+import { auth } from '@/firebase'
 import CustomDropdown from '@/components/CustomDropdown.vue'
 import { trainingAddresses, trainingTypes, getDifficultyLevels, getTrainingNames, swimmingIconImg, runningIconImg, cyclingIconImg, otherIconImg } from '@/data/trainingConfig'
+import { getAllSchedules, saveSchedule } from '@/services/scheduleService'
 
 // Props
 const props = defineProps({
@@ -272,20 +272,9 @@ function showNotification(type, message, title = '') {
 async function loadAllSchedules() {
   try {
     loadingSchedules.value = true
-    const schedulesQuery = query(collection(db, 'schedules'))
-    const querySnapshot = await getDocs(schedulesQuery)
+    const schedules = await getAllSchedules()
     
-    const schedules = []
-    querySnapshot.forEach(doc => {
-      schedules.push({
-        id: doc.id,
-        ...doc.data()
-      })
-    })
-    
-    savedSchedules.value = schedules.sort((a, b) => {
-      return new Date(b.weekStart) - new Date(a.weekStart)
-    })
+    savedSchedules.value = schedules
     
     if (savedSchedules.value.length > 0) {
       currentScheduleIndex.value = 0
@@ -797,15 +786,14 @@ async function saveScheduleToDatabase() {
       }
     })
     
-    const docRef = await addDoc(collection(db, 'schedules'), {
-      weekStart: weekStartDate.value,
-      weekEnd: weekEndDate.value,
-      trainings: trainingsToSave,
-      createdAt: new Date().toISOString(),
-      createdBy: auth.currentUser?.email || 'unknown'
-    })
+    const scheduleId = await saveSchedule(
+      weekStartDate.value,
+      weekEndDate.value,
+      trainingsToSave,
+      auth.currentUser?.email || 'unknown'
+    )
     
-    if (docRef && docRef.id) {
+    if (scheduleId) {
       saveSuccess.value = true
       showNotification('success', `Успішно збережено ${trainingsToSave.length} тренувань`, 'Розклад збережено')
       

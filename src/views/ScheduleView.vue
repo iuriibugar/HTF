@@ -148,10 +148,11 @@
 import { ref, computed, onMounted } from 'vue'
 import HeaderWrapper from '../components/HeaderWrapper.vue'
 import Footer from '../components/htfFooter.vue'
-import { db } from '../firebase'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import { getTrainingIcon } from '../data/trainingConfig.js'
 import backgroundImage from '@/assets/background.png'
+import { getScheduleForWeek } from '@/services/scheduleService'
+import { getScheduleRegistrations } from '@/services/registrationService'
+
 const loading = ref(true)
 const schedule = ref(null)
 const registrations = ref([])
@@ -273,37 +274,11 @@ const loadCurrentWeekSchedule = async () => {
     loading.value = true
     
     const { monday, sunday } = getCurrentWeekDates()
-    const mondayStr = monday.toISOString().split('T')[0]
-    const sundayStr = sunday.toISOString().split('T')[0]
+    const foundSchedule = await getScheduleForWeek(monday, sunday)
     
-    // Завантажуємо всі розклади
-    const allSchedulesQuery = query(collection(db, 'schedules'))
-    const allSchedulesSnapshot = await getDocs(allSchedulesQuery)
-    
-    // Фільтруємо розклади: weekStart має бути >= понеділок і weekEnd <= неділя
-    const validSchedules = []
-    allSchedulesSnapshot.forEach(doc => {
-      const data = doc.data()
-      const scheduleStart = data.weekStart
-      const scheduleEnd = data.weekEnd
-      
-      if (scheduleStart >= mondayStr && scheduleEnd <= sundayStr) {
-        validSchedules.push({ id: doc.id, ...data })
-      }
-    })
-    
-    if (validSchedules.length > 0) {
-      // Сортуємо за датою створення і беремо останній
-      validSchedules.sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0)
-        const dateB = new Date(b.createdAt || 0)
-        return dateB.getTime() - dateA.getTime()
-      })
-      
-      schedule.value = validSchedules[0]
-      
-      // Завантажити реєстрації для цього розкладу
-      await loadRegistrations(schedule.value.id)
+    if (foundSchedule) {
+      schedule.value = foundSchedule
+      await loadRegistrations(foundSchedule.id)
     } else {
       schedule.value = null
     }
@@ -318,16 +293,8 @@ const loadCurrentWeekSchedule = async () => {
 // Завантажити всі реєстрації для розкладу
 const loadRegistrations = async (scheduleId) => {
   try {
-    const q = query(
-      collection(db, 'registrations'),
-      where('scheduleId', '==', scheduleId)
-    )
-    
-    const querySnapshot = await getDocs(q)
-    registrations.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
+    const regs = await getScheduleRegistrations(scheduleId)
+    registrations.value = regs
   } catch (err) {
     console.error('Помилка завантаження реєстрацій:', err)
   }

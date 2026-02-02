@@ -98,11 +98,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { db } from '@/firebase'
-import { collection, getDocs } from 'firebase/firestore'
 import HeaderWrapper from '@/components/HeaderWrapper.vue'
 import Footer from '@/components/htfFooter.vue'
 import backgroundImage from '@/assets/background.png'
+import { getAllDonations } from '@/services/donationService'
 
 const loading = ref(false)
 const donations = ref([])
@@ -130,17 +129,7 @@ const gridClasses = computed(() => {
 async function loadDonations() {
   try {
     loading.value = true
-    const querySnapshot = await getDocs(collection(db, 'donations'))
-    
-    donations.value = []
-    querySnapshot.forEach(doc => {
-      donations.value.push({ id: doc.id, ...doc.data() })
-    })
-    
-    // Сортуємо за датою оновлення (новіші спочатку)
-    donations.value.sort((a, b) => {
-      return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
-    })
+    donations.value = await getAllDonations()
   } catch (error) {
     console.error('Помилка завантаження донатів:', error)
   } finally {

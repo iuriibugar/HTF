@@ -1,23 +1,13 @@
-import { addDoc, collection, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
+/**
+ * АРХІВНИЙ ФАЙЛ - функціональність перенесена на окремі сервіси
+ * 
+ * Див:
+ * - registrationService.js - для операцій з реєстраціями на тренування
+ * - scheduleService.js - для операцій з розкладами
+ * 
+ * Цей файл залишений для зворотної сумісності, але не використовується
+ */
 
-// Реєстрація на тренування
-export async function registerForTraining(trainingId, userName, userEmail) {
-  try {
-    await addDoc(collection(db, 'registrations'), {
-      trainingId,
-      userName,
-      userEmail,
-      timestamp: new Date().toISOString()
-    })
-    alert('Ви успішно зареєструвались на тренування!')
-  } catch (error) {
-    console.error('Помилка реєстрації:', error)
-  }
-}
-
-// Отримання всіх реєстрацій (для адміністратора)
-export async function getAllRegistrations() {
-  const querySnapshot = await getDocs(collection(db, 'registrations'))
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-}
+// Рекомендується використовувати
+// import { registerForTraining } from '@/services/registrationService'
+// import { getAllSchedules } from '@/services/scheduleService'
