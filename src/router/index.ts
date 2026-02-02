@@ -1,14 +1,15 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import MainPage from '../views/MainPage.vue'
 import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
 import CabinetView from '../views/CabinetView.vue'
 import ScheduleView from '../views/ScheduleView.vue'
 import DonationsView from '../views/DonationsView.vue'
-import { auth } from '../firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import { getCurrentUser, isAdminUser } from '@/services/authService'
+import { getUserProfile } from '@/services/userService'
 
 const router = createRouter({
-  history: createWebHashHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -19,6 +20,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView
     },
     {
       path: '/schedule',
@@ -37,6 +43,13 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/user/profile',
+      name: 'user-profile',
+      component: CabinetView,
+      meta: { requiresAuth: true },
+      props: { section: 'user-profile' }
+    },
+    {
       path: '/user/registration',
       name: 'user-registration',
       component: CabinetView,
@@ -44,10 +57,24 @@ const router = createRouter({
       props: { section: 'training-registration' }
     },
     {
+      path: '/user/statistics',
+      name: 'user-statistics',
+      component: CabinetView,
+      meta: { requiresAuth: true },
+      props: { section: 'statistics' }
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: CabinetView,
       meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: CabinetView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      props: { section: 'users-manager' }
     },
     {
       path: '/admin/schedule',
@@ -78,16 +105,6 @@ const ADMIN_EMAILS = [
   'bugary20@gmail.com',
 ]
 
-// Функція для отримання поточного користувача
-const getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe()
-      resolve(user)
-    }, reject)
-  })
-}
-
 // Перевірка авторизації перед переходом на сторінку
 router.beforeEach(async (to: any, from: any, next: any) => {
   const requiresAuth = to.matched.some((record: any) => record.meta.requiresAuth)
@@ -96,16 +113,51 @@ router.beforeEach(async (to: any, from: any, next: any) => {
   if (requiresAuth || requiresAdmin) {
     const user: any = await getCurrentUser()
     
-    if (requiresAuth && !user) {
+    if (!user) {
+      // Користувач не авторизований
       next('/login')
-    } else if (requiresAdmin && user) {
-      if (ADMIN_EMAILS.includes(user.email || '')) {
-        next()
-      } else {
-        next('/user')
-      }
     } else {
-      next()
+      try {
+        // Перевіряємо чи користувач адмін (за email)
+        const isAdmin = isAdminUser(user.email, ADMIN_EMAILS)
+        
+        if (requiresAdmin) {
+          // Перевірка прав адміна
+          if (isAdmin) {
+            next()
+          } else {
+            next('/user')
+          }
+        } else if (requiresAuth) {
+          // Адміни завжди мають доступ
+          if (isAdmin) {
+            next()
+          } else {
+            // Для звичайних користувачів дозволяємо доступ у кабінет
+            // Незалежно від статусу (одобрено чи очікує)
+            try {
+              const userProfile = await getUserProfile(user.uid)
+              
+              if (userProfile && userProfile.status === 'blocked') {
+                // Тільки заблокованих кидаємо на login
+                next('/login')
+              } else {
+                // Дозволяємо усім іншим (одобрено, очікує, новичок)
+                next()
+              }
+            } catch (profileError) {
+              // Навіть якщо помилка завантаження - дозволяємо доступ
+              // (користувач новий, до першого запису до БД)
+              next()
+            }
+          }
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.error('Помилка при перевірці доступу:', error)
+        next('/login')
+      }
     }
   } else {
     next()

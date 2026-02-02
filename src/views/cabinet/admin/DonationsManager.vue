@@ -10,7 +10,7 @@
     :saving="saving"
     :editing-id="editingId"
     @edit="editDonation"
-    @delete="deleteDonation"
+    @delete="deleteDonationHandler"
     @save="saveDonation"
     @cancel="cancelEdit">
     
@@ -86,9 +86,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { db } from '@/firebase'
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import ItemsManager from '@/components/ItemsManager.vue'
+import { getAllDonations, createDonation, updateDonation, deleteDonation } from '@/services/donationService'
 
 // Props/Emits
 const emit = defineEmits(['show-notification'])
@@ -118,17 +117,7 @@ const errors = ref({
 async function loadDonations() {
   try {
     loading.value = true
-    const querySnapshot = await getDocs(collection(db, 'donations'))
-    
-    donations.value = []
-    querySnapshot.forEach(doc => {
-      donations.value.push({ id: doc.id, ...doc.data() })
-    })
-    
-    // Сортуємо за датою оновлення (новіші спочатку)
-    donations.value.sort((a, b) => {
-      return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
-    })
+    donations.value = await getAllDonations()
   } catch (error) {
     console.error('Помилка завантаження донатів:', error)
     emit('show-notification', 'error', 'Помилка завантаження даних', 'Помилка')
@@ -164,12 +153,11 @@ function cancelEdit() {
 }
 
 // Видалити донат
-async function deleteDonation(donationId) {
+async function deleteDonationHandler(donationId) {
   if (!confirm('Ви впевнені, що хочете видалити цей донат?')) return
   
   try {
-    // Видалити документ з Firestore
-    await deleteDoc(doc(db, 'donations', donationId))
+    await deleteDonation(donationId)
     
     emit('show-notification', 'success', 'Донат успішно видалено', 'Успіх')
     
@@ -267,19 +255,16 @@ async function saveDonation() {
       title: formData.value.title.trim(),
       description: formData.value.description.trim(),
       link: formData.value.link.trim(),
-      imageBase64: imagePreview.value || '', // Зберігаємо Base64 рядок
-      updatedAt: new Date().toISOString()
+      imageBase64: imagePreview.value || ''
     }
     
     if (editingId.value) {
       // Оновити існуючий донат
-      const donationDocRef = doc(db, 'donations', editingId.value)
-      await updateDoc(donationDocRef, donationData)
+      await updateDonation(editingId.value, donationData)
       emit('show-notification', 'success', 'Донат успішно оновлено', 'Успіх')
     } else {
       // Створити новий донат
-      donationData.createdAt = new Date().toISOString()
-      await addDoc(collection(db, 'donations'), donationData)
+      await createDonation(donationData)
       emit('show-notification', 'success', 'Новий донат успішно створено', 'Успіх')
     }
     

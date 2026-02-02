@@ -1,11 +1,5 @@
 // Конфігурація для форми створення розкладу тренувань
 
-// Імпорт іконок
-import swimmingIconImg from '@/assets/trainingIcons/icon-swimming.png'
-import runningIconImg from '@/assets/trainingIcons/icon-running.png'
-import cyclingIconImg from '@/assets/trainingIcons/icon-cycling.png'
-import otherIconImg from '@/assets/trainingIcons/icon-other.png'
-
 // Назви тренувань за типами
 export const trainingNamesByType = {
   swimming: [
@@ -90,14 +84,17 @@ export const trainingAddresses = [
   'Обухівська траса'
 ]
 
-// Іконки типів тренувань (емоджі для відображення в UI)
+// Іконки типів тренувань
 export const swimmingIcon = '🏊'
 export const runningIcon = '🏃'
 export const cyclingIcon = '🚴'
 export const otherIcon = '📋'
 
-// Експортуємо іконки-картинки
-export { swimmingIconImg, runningIconImg, cyclingIconImg, otherIconImg }
+// Шляхи до файлів іконок
+export const swimmingIconImg = new URL('@/assets/trainingIcons/icon-swimming.png', import.meta.url).href
+export const runningIconImg = new URL('@/assets/trainingIcons/icon-running.png', import.meta.url).href
+export const cyclingIconImg = new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href
+export const otherIconImg = new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href
 
 export const trainingTypes = [
   { value: 'swimming', label: `Плавання`, icon: swimmingIcon, iconImg: swimmingIconImg, name: 'Плавання' },
