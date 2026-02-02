@@ -1,41 +1,108 @@
 <template>
-  <div class="bg-white bg-opacity-90 rounded-2xl shadow-lg p-6">
-    <h1 class="text-3xl font-bold mb-6">📅 Реєстрація на тренування</h1>
+  <div class="bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-lg p-2 sm:p-4">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-yellow-400">📅 Реєстрація на тренування</h1>
     
     <!-- Завантаження -->
     <div v-if="loadingSchedule" class="text-center py-12">
-      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-600">Завантаження розкладу...</p>
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+      <p class="text-white">Завантаження розкладу...</p>
     </div>
     
     <!-- Немає розкладу -->
     <div v-else-if="!currentSchedule || !currentSchedule.trainings || currentSchedule.trainings.length === 0" class="text-center py-12">
-      <p class="text-gray-600 text-xl mb-4">📭 Розклад на поточний тиждень ще не створений</p>
-      <p class="text-gray-500">Спочатку створіть розклад у розділі "Сформувати розклад"</p>
+      <p class="text-white text-lg sm:text-xl mb-4">📭 Розклад на поточний тиждень ще не створений</p>
+      <p class="text-gray-300">Спочатку створіть розклад у розділі "Сформувати розклад"</p>
     </div>
     
     <!-- Список тренувань -->
-    <div v-else class="space-y-6">
-      <div v-for="(dayTrainings, dayName) in groupedTrainings" :key="dayName" class="border border-gray-200 rounded-xl overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4">
-          <h2 class="text-2xl font-bold">{{ dayName }}</h2>
-          <p class="text-sm text-blue-100">{{ formatDate(dayTrainings[0].date) }}</p>
+    <div v-else class="space-y-4 sm:space-y-6">
+      <div v-for="(dayTrainings, dayName) in groupedTrainings" :key="dayName" class="border-2 border-yellow-400 rounded-xl overflow-hidden">
+        <div class="bg-gray-700/70 text-white px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-yellow-400 flex items-center justify-between">
+          <h2 class="text-xl sm:text-2xl font-bold text-yellow-400">{{ dayName }}</h2>
+          <p class="text-sm text-gray-300">{{ formatDate(dayTrainings[0].date) }}</p>
         </div>
         
-        <div class="p-6 space-y-4 bg-gray-50">
-          <div v-for="(training, idx) in dayTrainings" :key="idx" class="flex items-center justify-between p-4 bg-white rounded-lg hover:shadow-md transition-shadow border border-gray-200">
+        <div class="p-2 sm:p-4 space-y-3 sm:space-y-4 bg-gray-700/50">
+          <!-- МОБІЛЬНА ВЕРСТКА -->
+          <div v-for="(training, idx) in dayTrainings" :key="idx" class="sm:hidden border-2 border-yellow-400 rounded-lg p-4 bg-gray-800">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2 min-w-0 flex-1">
+                <img :src="getTrainingImage(training.type)" :alt="training.type" class="w-8 h-8 object-contain flex-shrink-0" />
+                <h3 class="text-lg font-bold text-yellow-400 truncate">{{ training.name }}</h3>
+              </div>
+              <div class="text-right">
+                <div class="text-2l font-bold text-white">{{ training.time }}</div>
+              </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span :class="['px-3 py-1 rounded text-xs font-semibold', getDifficultyColor(training.difficulty)]">
+                {{ training.difficulty }}
+              </span>
+              <span v-if="training.isPaid" class="px-3 py-1 rounded text-xs font-semibold bg-yellow-400 text-black">
+                💰 Платне
+              </span>
+            </div>
+            
+            <div class="space-y-2 mb-4 text-gray-300 text-sm">
+              <div class="flex items-start gap-2">
+                <span>📍</span>
+                <span>{{ training.address }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>🏃</span>
+                <span>{{ training.type }}</span>
+              </div>
+            </div>
+            
+            <!-- Мобільні кнопки -->
+            <div class="space-y-2">
+              <!-- Тренування вже минуло -->
+              <button 
+                v-if="isTrainingPast(training) && !isRegistered(training)"
+                disabled
+                class="w-full px-4 py-2 rounded-lg font-semibold bg-gray-600 text-gray-400 cursor-not-allowed opacity-60">
+                🕐 Тренування минуло
+              </button>
+              
+              <!-- Можна зареєструватись -->
+              <button 
+                v-else-if="!isRegistered(training)"
+                @click="registerForTraining(training)"
+                class="w-full px-4 py-3 rounded-lg font-semibold border-2 border-white text-white hover:border-yellow-400 hover:text-yellow-400 transition-colors">
+                📝 Зареєструватися
+              </button>
+              
+              <!-- Вже зареєстрований -->
+              <template v-else>
+                <button 
+                  class="w-full px-4 py-3 rounded-lg font-semibold bg-yellow-400 text-black cursor-default">
+                  ✅ Зареєстровано
+                </button>
+                <button 
+                  v-if="!isTrainingPast(training)"
+                  @click="cancelRegistration(training)"
+                  class="w-full px-4 py-2 rounded-lg font-semibold border-2 border-white text-white hover:border-red-400 hover:text-red-400 transition-colors">
+                  ❌ Відмінити
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- ДЕСКТОПНА ВЕРСТКА -->
+          <div v-for="(training, idx) in dayTrainings" :key="idx" class="hidden sm:flex items-center justify-between gap-4 p-4 bg-gray-800 rounded-lg border-2 border-yellow-400 hover:shadow-lg transition-shadow">
             <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <span class="text-2xl">{{ getTypeEmoji(training.type) }}</span>
-                <h3 class="text-xl font-bold text-gray-800">{{ training.name }}</h3>
-                <span :class="['px-3 py-1 rounded-full text-sm font-semibold', getDifficultyColor(training.difficulty)]">
+              <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+                <img :src="getTrainingImage(training.type)" :alt="training.type" class="w-8 h-8 object-contain" />
+                <h3 class="text-lg sm:text-xl font-bold text-yellow-400">{{ training.name }}</h3>
+                <span :class="['px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold', getDifficultyColor(training.difficulty)]">
                   {{ training.difficulty }}
                 </span>
-                <span v-if="training.isPaid" class="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+                <span v-if="training.isPaid" class="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-yellow-400 text-black">
                   💰 Платне
                 </span>
               </div>
-              <div class="flex items-center gap-6 text-gray-600">
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-300 text-sm">
                 <div class="flex items-center gap-2">
                   <span>🕐</span>
                   <span class="font-semibold">{{ training.time }}</span>
@@ -50,12 +117,12 @@
                 </div>
               </div>
             </div>
-            <div class="ml-6 flex flex-col gap-2">
+            <div class="flex flex-col gap-2 flex-shrink-0">
               <!-- Тренування вже минуло -->
               <button 
                 v-if="isTrainingPast(training) && !isRegistered(training)"
                 disabled
-                class="px-6 py-3 rounded-lg font-semibold bg-gray-400 text-white cursor-not-allowed shadow-lg opacity-60">
+                class="px-10 py-2 rounded font-semibold text-sm bg-gray-600 text-gray-400 cursor-not-allowed opacity-60 whitespace-nowrap">
                 🕐 Тренування минуло
               </button>
               
@@ -63,20 +130,20 @@
               <button 
                 v-else-if="!isRegistered(training)"
                 @click="registerForTraining(training)"
-                class="px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl">
-                📝 Зареєструватися
+                class="px-10 py-2 rounded font-semibold text-sm transition-all border-2 border-white text-white hover:border-yellow-400 hover:text-yellow-400 whitespace-nowrap">
+                📝 Записатися
               </button>
               
               <!-- Вже зареєстрований -->
               <template v-else>
                 <button 
-                  class="px-6 py-3 rounded-lg font-semibold bg-green-500 text-white cursor-default shadow-lg">
+                  class="px-10 py-2 rounded font-semibold text-sm bg-yellow-400 text-black cursor-default whitespace-nowrap">
                   ✅ Зареєстровано
                 </button>
                 <button 
                   v-if="!isTrainingPast(training)"
                   @click="cancelRegistration(training)"
-                  class="px-6 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl">
+                  class="px-10 py-2 rounded font-semibold text-sm border-2 border-white text-white hover:border-red-400 hover:text-red-400 transition-colors whitespace-nowrap">
                   ❌ Відмінити
                 </button>
               </template>
@@ -87,8 +154,8 @@
     </div>
     
     <!-- Повідомлення про успіх -->
-    <div v-if="registrationSuccess" class="fixed bottom-8 right-8 bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl animate-bounce">
-      <p class="font-semibold">✅ {{ registrationSuccess }}</p>
+    <div v-if="registrationSuccess" class="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 bg-yellow-400 text-black px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-bounce z-50">
+      <p class="font-semibold text-sm sm:text-base">✅ {{ registrationSuccess }}</p>
     </div>
   </div>
 </template>
@@ -167,14 +234,26 @@ const getTypeEmoji = (type) => {
   return getTrainingIcon(type)
 }
 
+// Отримати картинку для типу тренування
+const getTrainingImage = (type) => {
+  const iconMap = {
+    'swimming': new URL('@/assets/trainingIcons/icon-swimming.png', import.meta.url).href,
+    'running': new URL('@/assets/trainingIcons/icon-running.png', import.meta.url).href,
+    'cycling': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
+    'other': new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href
+  }
+  const key = type.toLowerCase()
+  return iconMap[key] || iconMap['other']
+}
+
 // Колір складності
 const getDifficultyColor = (difficulty) => {
   const map = {
-    'Легка': 'bg-green-100 text-green-800',
-    'Середня': 'bg-yellow-100 text-yellow-800',
-    'Важка': 'bg-red-100 text-red-800'
+    'Легка': 'bg-green-500 text-white',
+    'Середня': 'bg-yellow-500 text-black',
+    'Важка': 'bg-red-500 text-white'
   }
-  return map[difficulty] || 'bg-gray-100 text-gray-800'
+  return map[difficulty] || 'bg-gray-500 text-white'
 }
 
 // Завантажити розклад

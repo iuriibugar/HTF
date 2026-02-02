@@ -4,12 +4,12 @@
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
     <!-- Контент -->
-    <div class="relative z-10">
+    <div class="relative z-10 flex flex-col min-h-screen">
       <!-- Хедер -->
-      <Header />
+      <HeaderWrapper />
 
       <!-- Форма авторизації -->
-      <div class="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] p-2 sm:p-4">
+      <div class="flex flex-col items-center justify-center flex-1 p-2 sm:p-4">
         <div class="bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 sm:p-6 md:p-10 rounded-2xl shadow-2xl max-w-xs sm:max-w-md w-full border border-blue-100">
           <!-- Логотип -->
           <div class="flex justify-center mb-6">
@@ -36,6 +36,9 @@
           </p>
         </div>
       </div>
+
+      <!-- Footer -->
+      <Footer />
     </div>
   </div>
 </template>
@@ -44,7 +47,8 @@
 import { signInWithPopup } from 'firebase/auth'
 import { auth, googleProvider } from '../firebase'
 import { useRouter } from 'vue-router'
-import Header from '../components/htfHeader.vue'
+import HeaderWrapper from '../components/HeaderWrapper.vue'
+import Footer from '../components/htfFooter.vue'
 import backgroundImage from '@/assets/background.png'
 
 const router = useRouter()

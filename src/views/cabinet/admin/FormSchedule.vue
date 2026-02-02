@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-white bg-opacity-90 rounded-2xl shadow-lg p-2 sm:p-4">
+  <div class="bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-lg p-2 sm:p-4 ">
     <!-- Заголовок з пагінацією -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-      <h1 class="text-3xl font-bold">Формування розкладу</h1>
+      <h1 class="text-3xl font-bold text-yellow-400">Формування розкладу</h1>
       
       <!-- Пагінація розкладів -->
       <div v-if="savedSchedules.length > 0" class="flex items-center gap-2">
@@ -10,10 +10,10 @@
           @click="goToPreviousSchedule"
           :disabled="currentScheduleIndex === savedSchedules.length - 1"
           :class="[
-            'px-3 py-2 rounded-lg font-bold transition-colors',
+            'px-3 py-2 rounded-lg font-bold transition-colors border-2',
             currentScheduleIndex === savedSchedules.length - 1
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed border-gray-600'
+              : 'border-white text-white hover:border-yellow-400 hover:text-yellow-400'
           ]"
           :title="'Старіші розклади'"
         >
@@ -22,7 +22,7 @@
         
         <button
           @click="loadScheduleToForm"
-          class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors"
+          class="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-semibold transition-colors border-2 border-yellow-400"
           :title="'Завантажити розклад у форму'"
         >
           {{ currentSavedSchedule ? `${currentScheduleIndex + 1}: ${formatDateRange(currentSavedSchedule.weekStart, currentSavedSchedule.weekEnd)}` : 'Немає розкладів' }}
@@ -32,10 +32,10 @@
           @click="goToNextSchedule"
           :disabled="currentScheduleIndex === 0"
           :class="[
-            'px-3 py-2 rounded-lg font-bold transition-colors',
+            'px-3 py-2 rounded-lg font-bold transition-colors border-2',
             currentScheduleIndex === 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed border-gray-600'
+              : 'border-white text-white hover:border-yellow-400 hover:text-yellow-400'
           ]"
           :title="'Новіші розклади'"
         >
@@ -55,43 +55,44 @@
     </div>
     
     <!-- Вибір періоду -->
-    <div class="mb-4 sm:mb-6 p-2 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+    <div class="mb-4 sm:mb-6 p-2 sm:p-4 bg-gray-800/70 rounded-lg border-2 border-yellow-400">
+      <h3 class="text-lg font-bold text-yellow-400 mb-4">Період розкладу</h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Дата початку тижня *</label>
+          <label class="block text-sm font-semibold text-white mb-2">Дата початку тижня *</label>
           <input 
             ref="startDateInput"
             v-model="weekStartDate" 
             type="date"
             @click="openDatePicker($event)"
-            :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer',
-                     weekYearError && !weekStartDate ? 'border-red-500' : 'border-gray-300']" />
+            :class="['w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 cursor-pointer bg-gray-700 text-white',
+                     weekYearError && !weekStartDate ? 'border-red-500' : 'border-white hover:border-yellow-400']" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Дата кінця тижня *</label>
+          <label class="block text-sm font-semibold text-white mb-2">Дата кінця тижня *</label>
           <input 
             ref="endDateInput"
             v-model="weekEndDate" 
             type="date"
             @click="openDatePicker($event)"
-            :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer',
-                     weekYearError && !weekEndDate ? 'border-red-500' : 'border-gray-300']" />
+            :class="['w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 cursor-pointer bg-gray-700 text-white',
+                     weekYearError && !weekEndDate ? 'border-red-500' : 'border-white hover:border-yellow-400']" />
         </div>
       </div>
-      <p v-if="weekYearError" class="text-red-600 text-sm mt-2">⚠️ Обов'язково вкажіть дати початку та кінця тижня</p>
+      <p v-if="weekYearError" class="text-yellow-400 text-sm mt-2 font-semibold">⚠️ Обов'язково вкажіть дати початку та кінця тижня</p>
     </div>
     
     <!-- Таблиця тренувань по днях тижня -->
     <div class="space-y-4 sm:space-y-6">
-      <div v-for="day in daysOfWeek" :key="day.id" class="border border-gray-200 rounded-xl p-2 sm:p-4 bg-gray-50">
-        <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 text-gray-800">{{ day.name }}</h3>
+      <div v-for="day in daysOfWeek" :key="day.id" class="border-2 border-yellow-400 rounded-xl p-2 sm:p-4 bg-gray-800/70">
+        <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-4 text-yellow-400">{{ day.name }}</h3>
         
         <!-- Список тренувань для цього дня -->
-        <div v-for="(training, index) in day.trainings" :key="`${day.id}-${index}-${forceUpdate}`" class="mb-2 sm:mb-4 p-2 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+        <div v-for="(training, index) in day.trainings" :key="`${day.id}-${index}-${forceUpdate}`" class="mb-2 sm:mb-4 p-2 sm:p-4 bg-gray-700/50 rounded-lg shadow-sm border-2 border-yellow-400">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
             <!-- Тип тренування + Назва -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Тип тренування *</label>
+              <label class="block text-sm font-semibold text-white mb-2">Тип тренування *</label>
               <div class="flex gap-2">
                 <CustomDropdown
                   v-model="training.type"
@@ -111,7 +112,7 @@
 
             <!-- Складність -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Складність *</label>
+              <label class="block text-sm font-semibold text-white mb-2">Складність *</label>
               <CustomDropdown
                 v-model="training.difficulty"
                 :options="getDifficultyLevels(training.type)"
@@ -122,17 +123,17 @@
 
             <!-- Час початку -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Час початку *</label>
+              <label class="block text-sm font-semibold text-white mb-2">Час початку *</label>
               <input 
                 v-model="training.time" 
                 type="time" 
-                :class="['w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                         training.error && !training.time ? 'border-red-500' : 'border-gray-300']" />
+                :class="['w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
+                         training.error && !training.time ? 'border-red-500' : 'border-white hover:border-yellow-400']" />
             </div>
 
             <!-- Платне тренування -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Тип оплати</label>
+              <label class="block text-sm font-semibold text-white mb-2">Тип оплати</label>
               <CustomDropdown
                 v-model="training.isPaid"
                 :options="[{value: '', label: 'Безкоштовно'}, {value: 'paid', label: '💵 Платне'}]"
@@ -142,7 +143,7 @@
 
             <!-- Адреса -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Адреса *</label>
+              <label class="block text-sm font-semibold text-white mb-2">Адреса *</label>
               <div class="flex gap-2">
                 <CustomDropdown
                   v-model="training.address"
@@ -153,8 +154,8 @@
                 />
                 <button 
                   @click="removeTraining(day.id, index)"
-                  class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  class="px-3 py-2 bg-transparent border-2 border-white text-white rounded-lg transition hover:border-red-400 hover:text-red-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
                   </svg>
                 </button>
@@ -166,7 +167,7 @@
         <!-- Кнопка додати тренування -->
         <button 
           @click="addTraining(day.id)"
-          class="w-full mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+          class="w-full mt-2 px-4 py-2 border-2 border-yellow-400 text-white rounded-lg transition hover:border-white hover:text-yellow-400">
           ➕ Додати тренування
         </button>
       </div>
@@ -182,12 +183,12 @@
     <div class="mt-8 flex gap-4">
       <button 
         @click="generateSchedule"
-        class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition text-lg">
+        class="flex-1 px-6 py-3 border-2 border-white text-white font-semibold rounded-lg transition text-lg hover:border-yellow-400 hover:text-yellow-400">
         ✨ Сформувати розклад
       </button>
       <button 
         @click="saveScheduleToDatabase"
-        class="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition text-lg">
+        class="flex-1 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg transition text-lg border-2 border-yellow-400">
         💾 Завантажити розклад в БД
       </button>
     </div>
@@ -203,13 +204,13 @@
     </div>
 
     <!-- Попередній перегляд та завантаження -->
-    <div v-if="generatedImage" class="mt-8 p-4 bg-gray-50 rounded-xl">
-      <h3 class="text-xl font-semibold mb-4">Згенерований розклад</h3>
+    <div v-if="generatedImage" class="mt-8 p-4 bg-gray-800/70 rounded-xl border-2 border-white">
+      <h3 class="text-xl font-bold mb-4 text-yellow-400">Згенерований розклад</h3>
       <div class="flex flex-col items-center gap-4">
-        <canvas ref="scheduleCanvas" class="border border-gray-300 rounded-lg shadow-lg max-w-full"></canvas>
+        <canvas ref="scheduleCanvas" class="border-2 border-white rounded-lg shadow-lg max-w-full"></canvas>
         <button 
           @click="downloadSchedule"
-          class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition">
+          class="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg transition border-2 border-yellow-400">
           📥 Скачати розклад
         </button>
       </div>
@@ -649,7 +650,7 @@ async function generateSchedule() {
         }
 
         ctx.fillStyle = '#ffffff'
-        ctx.font = 'semi-bold 34px Montserrat'
+        ctx.font = '300 32px Montserrat'
         ctx.textAlign = 'left'
         ctx.fillText(training.name, trainingBlockX + 85, trainingYPosition + contentOffsetY + 25)
         
@@ -660,7 +661,7 @@ async function generateSchedule() {
         }
 
         ctx.fillStyle = '#D1D5DB'
-        ctx.font = '22px Montserrat'
+        ctx.font = '20px Montserrat'
         ctx.fillText(training.address, trainingBlockX + 85, trainingYPosition + contentOffsetY + 55)
 
         const difficultyX = trainingBlockX + trainingBlockWidth - 350
