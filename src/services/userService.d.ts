@@ -1,3 +1,4 @@
+
 /**
  * Типи для userService.js
  */
@@ -147,6 +148,7 @@ export {
   getPendingUsers,
   getAdmins,
   updateUserProfile,
+  ADMIN_EMAILS,
   addAdminNotes,
   deleteUser,
   isUserApproved,

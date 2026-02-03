@@ -27,15 +27,14 @@ function scrollDown() {
             <HeaderWrapper />
             <main class="text-center p-4 sm:p-6 md:p-10 lg:p-40">
                 <HomeView />
+                <!-- Кнопка внизу, адаптивна -->
+                <button 
+                    @click="scrollDown" 
+                    class="hidden sm:block absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-bold py-2 px-4 sm:px-6 md:px-8 rounded-full hover:bg-yellow-500 transition text-base sm:text-lg">
+                    Давай знайомитись
+                </button>
             </main>
         </div>
-
-        <!-- Кнопка внизу, адаптивна -->
-        <button 
-            @click="scrollDown" 
-            class="fixed sm:absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-bold py-2 px-4 sm:px-6 md:px-8 rounded-full hover:bg-yellow-500 transition text-base sm:text-lg">
-            Давай знайомитись
-        </button>
     </div>
 
     <div class="flex flex-col items-center justify-center h-auto bg-white text-black p-4 sm:p-6 md:h-80">

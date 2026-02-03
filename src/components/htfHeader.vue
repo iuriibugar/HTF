@@ -20,6 +20,7 @@ const showApprovalTooltip = ref(false)
 const ADMIN_EMAILS = [
   'kulikalovdenis@gmail.com',
   'bugary20@gmail.com',
+  'a4878814@gmail.com',
 ]
 
 // Визначити чи користувач адмін

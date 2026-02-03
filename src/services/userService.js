@@ -2,9 +2,10 @@ import { db, auth } from '@/firebase'
 import { collection, doc, setDoc, getDoc, updateDoc, getDocs, query, where } from 'firebase/firestore'
 
 // Список email адміністраторів (замовчувані адміни)
-const ADMIN_EMAILS = [
+export const ADMIN_EMAILS = [
   'kulikalovdenis@gmail.com',
   'bugary20@gmail.com',
+  'oleksii.kozhushko@gmail.com',
 ]
 
 /**
@@ -167,11 +168,16 @@ export async function changeUserRole(uid, role, adminUid) {
     
     const userRef = doc(db, 'users', uid)
     
-    await updateDoc(userRef, {
+    const updateData = {
       role: role,
       updatedAt: new Date().toISOString(),
       updatedBy: adminUid
-    })
+    }
+    // Автопідтвердження для адміна
+    if (role === 'admin') {
+      updateData.isApproved = true
+    }
+    await updateDoc(userRef, updateData)
     
     return true
   } catch (error) {

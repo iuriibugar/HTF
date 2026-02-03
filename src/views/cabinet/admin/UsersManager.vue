@@ -150,6 +150,14 @@
                 >
                   👑
                 </button>
+                <button
+                  v-if="user.role === 'admin'"
+                  @click="removeAdminRole(user.id)"
+                  class="px-3 py-1 bg-gray-400 hover:bg-gray-500 text-black rounded text-xs transition"
+                  title="Зняти права адміна"
+                >
+                  🙅‍♂️
+                </button>
                 <button 
                   @click="showUserDetails(user)"
                   class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs transition"
@@ -865,6 +873,17 @@ async function makeAdmin(userId) {
   } catch (error) {
     console.error('Помилка при зміні ролі:', error)
     showNotification('error', 'Помилка при зміні ролі')
+  }
+}
+
+async function removeAdminRole(userId) {
+  try {
+    await changeUserRole(userId, 'user', currentAdminUid.value)
+    showNotification('success', 'Права адміна знято')
+    await loadUsers()
+  } catch (error) {
+    console.error('Помилка при знятті прав адміна:', error)
+    showNotification('error', 'Помилка при знятті прав адміна')
   }
 }
 

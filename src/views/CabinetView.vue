@@ -23,24 +23,26 @@
 
     <!-- Весь контент -->
     <div class="relative z-10 h-full flex flex-col">
-      <!-- Хедер -->
       <HeaderWrapper />
 
-      <!-- Основний контент з боковою панеллю -->
-      <div class="flex flex-col lg:flex-row gap-2 lg:gap-4 p-2 sm:p-4 flex-1 min-h-0 overflow-y-auto">
-        <!-- Бокова панель меню -->
+      <div v-if="userStatus === 'blocked'" class="flex flex-1 items-center justify-center">
+        <div class="bg-red-700/90 border-2 border-red-400 rounded-lg p-8 text-center max-w-md mx-auto">
+          <h2 class="text-2xl font-bold text-white mb-4">🚫 Вас заблоковано</h2>
+          <p class="text-red-200 mb-2">Ваш акаунт заблокований адміністратором. Для уточнення причин зверніться до підтримки або адміністрації.</p>
+          <button @click="logoutHandler" class="mt-4 px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold rounded-lg transition">Вийти</button>
+        </div>
+      </div>
+
+      <div v-else class="flex flex-col lg:flex-row gap-2 lg:gap-4 p-2 sm:p-4 flex-1 min-h-0 overflow-y-auto">
         <aside
           class="w-full lg:w-80 bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-lg p-2 sm:p-4 flex-shrink-0 overflow-y-auto flex flex-col mb-2 lg:mb-0">
-          <!-- Інформація про користувача -->
           <div class="flex flex-col items-center mb-6 pb-6 border-b border-gray-400">
-            <!-- Аватар користувача -->
             <div v-if="userPhoto" class="w-20 h-20 rounded-full mb-3 shadow-md overflow-hidden bg-gray-200">
               <img :src="userPhoto" :alt="userName" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
             </div>
             <div v-else class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-2xl mb-3 shadow-md">
               {{ userName ? userName.charAt(0).toUpperCase() : 'A' }}
             </div>
-            
             <div class="flex items-center justify-center gap-2 w-full">
               <p class="font-semibold text-yellow-400 text-center">{{ userName || 'Користувач' }}</p>
               <button 
@@ -53,8 +55,6 @@
               </button>
             </div>
             <p class="text-sm text-yellow-400 text-center break-all">{{ userEmail }}</p>
-            
-            <!-- Статус погодження -->
             <div class="mt-3 w-full">
               <div v-if="!isAdmin" class="text-center">
                 <div v-if="isApproved" class="inline-block px-3 py-1 bg-green-600/50 text-green-300 rounded-full text-xs font-semibold">
@@ -69,8 +69,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Блок Адміна (тільки для адмінів) -->
           <div v-if="isAdmin" class="mb-6">
             <h3 class="text-sm font-bold text-yellow-400 uppercase mb-3">Адміністрування</h3>
             <button 
@@ -94,8 +92,6 @@
               <span>💰 Управління донатами</span>
             </button>
           </div>
-          
-          <!-- Блок для всіх -->
           <div>
             <h3 class="text-sm font-bold text-yellow-400 uppercase mb-3">Загальне</h3>
             <button 
@@ -118,10 +114,7 @@
             </button>
           </div>
         </aside>
-
-        <!-- Основний контент -->
         <main class="flex-1 w-full">
-          <!-- Повідомлення для неодобрених -->
           <div v-if="!isAdmin && !isApproved" class="bg-yellow-600/20 border-2 border-yellow-400 rounded-lg p-6 text-center mb-4">
             <h3 class="text-xl font-bold text-yellow-300 mb-2">⏳ Акаунт в очікуванні</h3>
             <p class="text-yellow-100">
@@ -135,8 +128,6 @@
               ✏️ Оновити дані
             </button>
           </div>
-          
-          <!-- Динамічний контент -->
           <component 
             v-if="isAdmin || isApproved"
             :is="currentComponent" 
@@ -240,12 +231,14 @@ async function loadUserProfile(userId) {
     if (userProfile) {
       isApproved.value = userProfile.isApproved
       userStatus.value = userProfile.status
+      isAdmin.value = userProfile.role === 'admin'
       trainingStats.value = userProfile.trainingStats || trainingStats.value
       userAmount.value = userProfile.amount || 0
       userDiscount.value = userProfile.discount?.percent || null
     } else {
       isApproved.value = false
       userStatus.value = 'active'
+      isAdmin.value = false
       userAmount.value = 0
       userDiscount.value = null
     }
@@ -292,10 +285,7 @@ onMounted(() => {
       userEmail.value = user.email || ''
       userPhoto.value = user.photoURL || ''
       
-      // Перевірка чи користувач адмін (за email)
-      isAdmin.value = isAdminUser(user.email, ADMIN_EMAILS)
-      
-      // Завантажуємо профіль користувача
+      // Завантажуємо профіль користувача (isAdmin визначається з профілю)
       await loadUserProfile(user.uid)
       
       // Якщо користувач звичайний та НЕ одобрений - перенаправляємо на реєстрацію
@@ -329,7 +319,7 @@ onMounted(() => {
 async function logoutHandler() {
   try {
     await logout()
-    navigateToHome()
+    router.push('/')
   } catch (error) {
     console.error('Помилка виходу:', error)
   }

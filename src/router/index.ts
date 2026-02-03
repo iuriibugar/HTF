@@ -5,7 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import CabinetView from '../views/CabinetView.vue'
 import ScheduleView from '../views/ScheduleView.vue'
 import DonationsView from '../views/DonationsView.vue'
-import { getCurrentUser, isAdminUser } from '@/services/authService'
+import { getCurrentUser } from '@/services/authService'
 import { getUserProfile } from '@/services/userService'
 
 const router = createRouter({
@@ -99,11 +99,8 @@ const router = createRouter({
   ],
 })
 
-// Список email адміністраторів
-const ADMIN_EMAILS = [
-  'kulikalovdenis@gmail.com',
-  'bugary20@gmail.com',
-]
+// Список email адміністраторів (імпортуємо з userService)
+import { ADMIN_EMAILS } from '@/services/userService'
 
 // Перевірка авторизації перед переходом на сторінку
 router.beforeEach(async (to: any, from: any, next: any) => {
@@ -112,38 +109,27 @@ router.beforeEach(async (to: any, from: any, next: any) => {
 
   if (requiresAuth || requiresAdmin) {
     const user: any = await getCurrentUser()
-    
     if (!user) {
-      // Користувач не авторизований
       next('/login')
-    } else {
-      try {
-        // Перевіряємо чи користувач адмін (за email)
-        const isAdmin = isAdminUser(user.email, ADMIN_EMAILS)
-        
-        if (requiresAdmin) {
-          // Перевірка прав адміна
-          if (isAdmin) {
-            next()
-          } else {
-            next('/user')
-          }
-        } else if (requiresAuth) {
-          // Адміни завжди мають доступ
-          if (isAdmin) {
-            next()
-          } else {
-            // Для звичайних користувачів - завжди дозволяємо
-            // Route guard не мав блокувати звичайних юзерів
-            next()
-          }
-        } else {
+      return
+    }
+    try {
+      const userProfile = await getUserProfile(user.uid)
+      const isAdmin = userProfile && userProfile.role === 'admin'
+      if (requiresAdmin) {
+        if (isAdmin) {
           next()
+        } else {
+          next('/user')
         }
-      } catch (error) {
-        console.error('Помилка при перевірці доступу:', error)
-        next('/login')
+      } else if (requiresAuth) {
+        next()
+      } else {
+        next()
       }
+    } catch (error) {
+      console.error('Помилка при перевірці доступу:', error)
+      next('/login')
     }
   } else {
     next()
