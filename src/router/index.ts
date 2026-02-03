@@ -133,23 +133,9 @@ router.beforeEach(async (to: any, from: any, next: any) => {
           if (isAdmin) {
             next()
           } else {
-            // Для звичайних користувачів дозволяємо доступ у кабінет
-            // Незалежно від статусу (одобрено чи очікує)
-            try {
-              const userProfile = await getUserProfile(user.uid)
-              
-              if (userProfile && userProfile.status === 'blocked') {
-                // Тільки заблокованих кидаємо на login
-                next('/login')
-              } else {
-                // Дозволяємо усім іншим (одобрено, очікує, новичок)
-                next()
-              }
-            } catch (profileError) {
-              // Навіть якщо помилка завантаження - дозволяємо доступ
-              // (користувач новий, до першого запису до БД)
-              next()
-            }
+            // Для звичайних користувачів - завжди дозволяємо
+            // Route guard не мав блокувати звичайних юзерів
+            next()
           }
         } else {
           next()

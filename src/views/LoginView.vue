@@ -67,6 +67,9 @@ async function loginWithGoogle() {
     const result = await signInWithPopup(auth, googleProvider)
     const user = result.user
     
+    // Чекаємо, щоб Firebase повністю синхронізувався
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
     // Визначаємо роль на основі email
     if (ADMIN_EMAILS.includes(user.email)) {
       router.push('/admin')

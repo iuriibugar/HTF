@@ -168,6 +168,7 @@ import Statistics from './cabinet/user/Statistics.vue'
 import backgroundImage from '@/assets/background.png'
 import { isAdminUser, logout } from '@/services/authService'
 import { getUserProfile } from '@/services/userService'
+import { navigateToHome } from '@/utils/navigation'
 
 const route = useRoute()
 const router = useRouter()
@@ -328,7 +329,7 @@ onMounted(() => {
 async function logoutHandler() {
   try {
     await logout()
-    window.location.href = '/HTF/'
+    navigateToHome()
   } catch (error) {
     console.error('Помилка виходу:', error)
   }

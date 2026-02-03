@@ -201,6 +201,7 @@ import HeaderWrapper from '../components/HeaderWrapper.vue'
 import Footer from '../components/htfFooter.vue'
 import { createOrUpdateUserProfile, registerNewUser } from '@/services/userService'
 import backgroundImage from '@/assets/background.png'
+import { navigateToHome } from '@/utils/navigation'
 
 const router = useRouter()
 
@@ -300,6 +301,6 @@ async function submitRegistration() {
 }
 
 function goHome() {
-  window.location.href = '/HTF/'
+  navigateToHome()
 }
 </script>

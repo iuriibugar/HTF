@@ -10,7 +10,11 @@
     "test:e2e": "playwright test",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "deploy": "gh-pages -d dist"
+    "build:firebase": "cross-env DEPLOY_TARGET=firebase npm run build",
+    "deploy:firebase": "npm run build:firebase && firebase deploy",
+    "build:github": "cross-env DEPLOY_TARGET=github npm run build",
+    "deploy:github": "npm run build:github && gh-pages -d dist -r https://github.com/iuriibugar/HTF.git",
+    "deploy": "npm run deploy:github"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
@@ -26,6 +30,7 @@
     "@vitejs/plugin-vue": "^6.0.2",
     "@vitejs/plugin-vue-jsx": "^5.1.2",
     "@vue/tsconfig": "^0.8.1",
+    "cross-env": "^10.1.0",
     "gh-pages": "^6.3.0",
     "npm-run-all2": "^8.0.4",
     "typescript": "~5.9.3",
