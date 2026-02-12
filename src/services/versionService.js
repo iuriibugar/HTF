@@ -4,8 +4,8 @@
  * Якщо відрізняються - показує поп-ап для оновлення
  */
 
-// Версія додатку - оновлюйте коли робите новий білд
-const BUILD_VERSION = '1.0.1'
+// Версія додатку - читається з package.json під час білду
+const BUILD_VERSION = __APP_VERSION__
 const VERSION_STORAGE_KEY = 'app-version'
 const VERSION_CHECK_INTERVAL = 5 * 60 * 1000 // 5 хвилин
 
