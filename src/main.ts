@@ -3,8 +3,12 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import versionService from './services/versionService'
 
 const app = createApp(App)
+
+// Експортуємо сервіс версії в глобальний об'єкт для дебагування
+window.__versionService = versionService
 
 app.use(router)
 
