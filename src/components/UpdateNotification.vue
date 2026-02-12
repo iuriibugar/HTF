@@ -79,21 +79,24 @@ const isUpdating = ref(false)
 let unsubscribe = null
 
 const handleUpdate = async () => {
+  console.log('🔄 Запуск оновлення...')
   isUpdating.value = true
   
   // Закриваємо поп-ап одразу
   showNotification.value = false
   
-  // Затримка щоб користувач мав час побачити закриття поп-ап
+  // Затримка щоб користувач побачив закриття поп-ап
   await new Promise(resolve => setTimeout(resolve, 300))
   
   // Запускаємо оновлення
+  console.log('✨ Оновлення додатку...')
   await versionService.updateApp()
 }
 
 onMounted(() => {
   // Ініціалізуємо сервіс - виконується один раз при завантаженні
   versionService.initialize()
+  console.log(`🚀 Версія додатку: ${versionService.getCurrentVersion()}`)
   
   // Підписуємось на оновлення версії
   unsubscribe = versionService.subscribe((version) => {
@@ -101,7 +104,7 @@ onMounted(() => {
     showNotification.value = true
   })
 
-  // Запускаємо періодичну перевірку кожні 5 хвилин
+  // Запускаємо періодичну перевірку
   versionService.startPeriodicCheck()
 })
 

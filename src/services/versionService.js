@@ -4,10 +4,10 @@
  * Якщо відрізняються - показує поп-ап для оновлення
  */
 
-// Версія додатку - БУДЬ-КОЛИ коли робите новий білд
+// Версія додатку - оновлюйте коли робите новий білд
 const BUILD_VERSION = '1.0.1'
 const VERSION_STORAGE_KEY = 'app-version'
-const VERSION_CHECK_INTERVAL = 1 * 60 * 1000 // 5 хвилин
+const VERSION_CHECK_INTERVAL = 5 * 60 * 1000 // 5 хвилин
 
 class VersionService {
   constructor() {
