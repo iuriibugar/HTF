@@ -1,4 +1,6 @@
-const CACHE_NAME = 'htf-v1'
+// Версія кеша оновлюється з кожним білдом
+const APP_VERSION = '1.0.8'
+const CACHE_NAME = `htf-cache-${APP_VERSION}`
 const urlsToCache = [
   '/',
   '/index.html',
