@@ -99,11 +99,12 @@ onMounted(() => {
   console.log(`🚀 Версія додатку: ${versionService.getCurrentVersion()}`)
   
   // Підписуємось на оновлення версії
-  unsubscribe = versionService.subscribe((version) => {
-    newVersion.value = version
+  unsubscribe = versionService.addListener((newVersion) => {
+    console.log(`🔔 Отримано нову версію: ${newVersion}`)
     showNotification.value = true
+    newVersion.value = newVersion
   })
-
+  
   // Запускаємо періодичну перевірку
   versionService.startPeriodicCheck()
 })

@@ -4,10 +4,11 @@
  * Якщо відрізняються - показує поп-ап для оновлення
  */
 
-// Версія додатку - читається з package.json під час білду
-const BUILD_VERSION = __APP_VERSION__
+// ⚠️ ЗМІНІТЬ ЦЮ ВЕРСІЮ ПЕРЕД ДЕПЛОЄМ
+// JS файли не кешуються, тому нова версія завантажиться автоматично
+const BUILD_VERSION = '1.0.6'
 const VERSION_STORAGE_KEY = 'app-version'
-const VERSION_CHECK_INTERVAL = 5 * 60 * 1000 // 5 хвилин
+const VERSION_CHECK_INTERVAL = 1 * 60 * 1000 // 1 хвилина
 
 class VersionService {
   constructor() {
@@ -23,23 +24,23 @@ class VersionService {
    */
   initialize() {
     try {
-      // Читаємо збережену версію
+      console.log('🔍 Ініціалізація версії...')
       this.cachedVersion = localStorage.getItem(VERSION_STORAGE_KEY)
+      console.log(`📦 Збережена версія: ${this.cachedVersion}`)
+      console.log(`🚀 Поточна версія: ${this.currentVersion}`)
 
-      // Якщо це перший запуск (немає збереженої версії)
       if (!this.cachedVersion) {
         this.saveVersion()
         return
       }
 
-      // Перевіряємо чи є нова версія
       if (this.cachedVersion !== this.currentVersion) {
-        console.log(`🚀 Нова версія доступна! ${this.cachedVersion} → ${this.currentVersion}`)
+        console.log(`✨ Нова версія доступна! ${this.cachedVersion} → ${this.currentVersion}`)
         this.newVersionAvailable = true
         this.notifyListeners(this.currentVersion)
       }
     } catch (error) {
-      console.error('Помилка при ініціалізації версії:', error)
+      console.error('❌ Помилка при ініціалізації версії:', error)
     }
   }
 
