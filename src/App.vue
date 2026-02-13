@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import VersionUpdatePopup from '@/components/VersionUpdatePopup.vue'
+import GlobalLoader from '@/components/GlobalLoader.vue'
 import { checkForUpdates, initializeVersion } from '@/services/versionService'
 
 // Стан для модального вікна оновлення
@@ -61,6 +62,7 @@ onUnmounted(() => {
 <template>
   <div class="min-h-screen w-full overflow-x-hidden">
     <router-view />
+    <GlobalLoader />
     <VersionUpdatePopup 
       :show="showUpdatePopup"
       :local-version="updateInfo.localVersion"

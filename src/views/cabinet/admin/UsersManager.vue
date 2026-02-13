@@ -609,6 +609,7 @@ import {
   addAdminNotes,
   updateUserBalance
 } from '@/services/userService'
+import { showLoader, hideLoader } from '@/stores/loaderStore'
 
 const users = ref([])
 const stats = ref({
@@ -724,6 +725,7 @@ function showBalanceConfirmation() {
 
 async function confirmSaveBalance() {
   try {
+    showLoader()
     const amount = balanceModal.value.newAmount
 
     await updateUserBalance(
@@ -746,6 +748,9 @@ async function confirmSaveBalance() {
     console.error('Помилка при оновленні балансу:', error)
     showNotification('error', 'Помилка при оновленні балансу')
   }
+  finally {
+    hideLoader()
+  }
 }
 
 function showTrainingStats(user) {
@@ -766,6 +771,7 @@ async function saveDiscount() {
   }
 
   try {
+    showLoader()
     const discountPercent = discountModal.value.discountPercent
 
     // Якщо знижка 0, видаляємо об'єкт знижки
@@ -813,6 +819,9 @@ async function saveDiscount() {
     console.error('Помилка при оновленні знижки:', error)
     showNotification('error', 'Помилка при оновленні знижки')
   }
+  finally {
+    hideLoader()
+  }
 }
 
 function getTotalRegistered(user) {
@@ -827,6 +836,7 @@ function getTotalRegistered(user) {
 
 async function approveUserHandler(userId) {
   try {
+    showLoader()
     await approveUserService(userId, true, currentAdminUid.value)
     
     // Оновлюємо локальний список
@@ -841,10 +851,14 @@ async function approveUserHandler(userId) {
     console.error('Помилка при одобренні:', error)
     showNotification('error', 'Помилка при одобренні користувача')
   }
+  finally {
+    hideLoader()
+  }
 }
 
 async function blockUser(userId) {
   try {
+    showLoader()
     await changeUserStatus(userId, 'blocked', currentAdminUid.value)
     showNotification('success', 'Користувач заблокований')
     await loadUsers()
@@ -852,10 +866,14 @@ async function blockUser(userId) {
     console.error('Помилка при блокуванні:', error)
     showNotification('error', 'Помилка при блокуванні користувача')
   }
+  finally {
+    hideLoader()
+  }
 }
 
 async function unblockUser(userId) {
   try {
+    showLoader()
     await changeUserStatus(userId, 'active', currentAdminUid.value)
     showNotification('success', 'Користувач розблокований')
     await loadUsers()
@@ -863,10 +881,14 @@ async function unblockUser(userId) {
     console.error('Помилка при розблокуванні:', error)
     showNotification('error', 'Помилка при розблокуванні користувача')
   }
+  finally {
+    hideLoader()
+  }
 }
 
 async function makeAdmin(userId) {
   try {
+    showLoader()
     await changeUserRole(userId, 'admin', currentAdminUid.value)
     showNotification('success', 'Користувач став адміністратором')
     await loadUsers()
@@ -874,16 +896,23 @@ async function makeAdmin(userId) {
     console.error('Помилка при зміні ролі:', error)
     showNotification('error', 'Помилка при зміні ролі')
   }
+  finally {
+    hideLoader()
+  }
 }
 
 async function removeAdminRole(userId) {
   try {
+    showLoader()
     await changeUserRole(userId, 'user', currentAdminUid.value)
     showNotification('success', 'Права адміна знято')
     await loadUsers()
   } catch (error) {
     console.error('Помилка при знятті прав адміна:', error)
     showNotification('error', 'Помилка при знятті прав адміна')
+  }
+  finally {
+    hideLoader()
   }
 }
 
@@ -913,11 +942,14 @@ function showNotification(type, message) {
 
 async function loadUsers() {
   try {
+    showLoader()
     users.value = await getAllUsers()
     stats.value = await getUsersStatistics()
   } catch (error) {
     console.error('Помилка при завантаженні користувачів:', error)
     showNotification('error', 'Помилка при завантаженні користувачів')
+  } finally {
+    hideLoader()
   }
 }
 

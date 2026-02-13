@@ -88,6 +88,7 @@
 import { ref, onMounted } from 'vue'
 import ItemsManager from '@/components/ItemsManager.vue'
 import { getAllDonations, createDonation, updateDonation, deleteDonation } from '@/services/donationService'
+import { showLoader, hideLoader } from '@/stores/loaderStore'
 
 // Props/Emits
 const emit = defineEmits(['show-notification'])
@@ -117,12 +118,14 @@ const errors = ref({
 async function loadDonations() {
   try {
     loading.value = true
+    showLoader()
     donations.value = await getAllDonations()
   } catch (error) {
     console.error('Помилка завантаження донатів:', error)
     emit('show-notification', 'error', 'Помилка завантаження даних', 'Помилка')
   } finally {
     loading.value = false
+    hideLoader()
   }
 }
 
@@ -157,6 +160,7 @@ async function deleteDonationHandler(donationId) {
   if (!confirm('Ви впевнені, що хочете видалити цей донат?')) return
   
   try {
+    showLoader()
     await deleteDonation(donationId)
     
     emit('show-notification', 'success', 'Донат успішно видалено', 'Успіх')
@@ -171,6 +175,9 @@ async function deleteDonationHandler(donationId) {
   } catch (error) {
     console.error('Помилка видалення:', error)
     emit('show-notification', 'error', 'Помилка видалення донату', 'Помилка')
+  }
+  finally {
+    hideLoader()
   }
 }
 
@@ -249,6 +256,7 @@ async function saveDonation() {
   
   try {
     saving.value = true
+    showLoader()
     
     // Дані для збереження
     const donationData = {
@@ -279,6 +287,7 @@ async function saveDonation() {
     emit('show-notification', 'error', error.message || 'Невідома помилка при збереженні', 'Помилка')
   } finally {
     saving.value = false
+    hideLoader()
   }
 }
 

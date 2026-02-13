@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-lg p-2 sm:p-4 ">
+  <div class="relative bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-lg p-2 sm:p-4 ">
     <!-- Заголовок з пагінацією -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
       <h1 class="text-3xl font-bold text-yellow-400">Формування розкладу</h1>
@@ -229,6 +229,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { showLoader, hideLoader } from '@/stores/loaderStore'
 import { auth } from '@/firebase'
 import CustomDropdown from '@/components/CustomDropdown.vue'
 import { trainingAddresses, trainingTypes, getDifficultyLevels, getTrainingNames, swimmingIconImg, runningIconImg, cyclingIconImg, otherIconImg } from '@/data/trainingConfig'
@@ -281,6 +282,7 @@ function showNotification(type, message, title = '') {
 async function loadAllSchedules() {
   try {
     loadingSchedules.value = true
+    showLoader()
     const schedules = await getAllSchedules()
     
     savedSchedules.value = schedules
@@ -292,6 +294,7 @@ async function loadAllSchedules() {
     console.error('Помилка завантаження розкладів:', error)
   } finally {
     loadingSchedules.value = false
+    hideLoader()
   }
 }
 
@@ -350,13 +353,14 @@ function loadScheduleToForm() {
           type: training.type,
           difficulty: training.difficulty,
           address: training.address,
-          isPaid: training.isPaid || false
+          // stored schedules keep isPaid as boolean — map to dropdown values ('paid' or '')
+          isPaid: training.isPaid ? 'paid' : ''
         })
       }
     })
   }
   
-  showNotification('success', 'Розклад завантажено у форму! Ви можете редагувати і зберегти його.', 'Успішно')
+  showNotification('success', 'Розклад завантажено у форму!', 'Успішно')
 }
 
 function getDayIdFromName(dayName) {
@@ -820,8 +824,18 @@ async function saveScheduleToDatabase() {
   }
 }
 
-onMounted(() => {
-  loadAllSchedules()
+onMounted(async () => {
+  await loadAllSchedules()
+
+  // If there are saved schedules, load the latest one into the form (trainings only)
+  if (savedSchedules.value.length > 0) {
+    // loadScheduleToForm populates dates and trainings; we want trainings visible
+    loadScheduleToForm()
+    // but keep the Period fields empty as requested
+    weekStartDate.value = ''
+    weekEndDate.value = ''
+    weekYearError.value = false
+  }
 })
 
 // Watch for changes to training fields and clear the error flag only when the training becomes valid

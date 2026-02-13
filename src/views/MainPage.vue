@@ -1,24 +1,66 @@
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import HeaderWrapper from '../components/HeaderWrapper.vue';
 import Footer from '../components/htfFooter.vue';
 import HomeView from './HomeView.vue';
 import backgroundImage from '@/assets/background.png'
+import backgroundMob from '@/assets/backgroundMob.png'
 import foundersImage from '@/assets/main/founders_HTF.png'
 import kulikalovImage from '@/assets/main/Kulikalov.png'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-function scrollDown() {
-    window.scrollBy({
-        top: window.innerHeight,
-        behavior: 'smooth',
-    });
+const showArrow = ref(true)
+const heroRef = ref(null)
+let _observer = null
+const isMobile = ref(false)
+const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
+
+function _checkMobile() {
+    isMobile.value = window.innerWidth < 768
 }
+function scrollDown() {
+                window.scrollBy({
+                                top: window.innerHeight,
+                                behavior: 'smooth',
+                });
+}
+
+function _onScroll() {
+  // hide arrow as soon as user scrolls past one viewport height
+  showArrow.value = window.scrollY < window.innerHeight
+}
+
+onMounted(() => {
+    // IntersectionObserver fallback (keeps behavior if layout changes)
+    _observer = new IntersectionObserver((entries) => {
+        const e = entries[0]
+        // Only set true when hero is intersecting; do not override hide caused by scrolling past viewport
+        if (e && e.isIntersecting) showArrow.value = true
+    }, { threshold: 0.15 })
+
+    if (heroRef.value) {
+        _observer.observe(heroRef.value)
+    }
+
+    _checkMobile()
+    window.addEventListener('resize', _checkMobile)
+
+    // Listen to scroll and hide once scrolled one viewport down
+    _onScroll()
+    window.addEventListener('scroll', _onScroll, { passive: true })
+})
+
+onUnmounted(() => {
+    if (_observer) _observer.disconnect()
+    window.removeEventListener('scroll', _onScroll)
+    window.removeEventListener('resize', _checkMobile)
+})
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${backgroundImage})` }">
+    <div ref="heroRef" class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${bgImage})` }">
         <!-- Затемнення -->
         <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -27,11 +69,14 @@ function scrollDown() {
             <HeaderWrapper />
             <main class="text-center p-4 sm:p-6 md:p-10 lg:p-40">
                 <HomeView />
-                <!-- Кнопка внизу, адаптивна -->
-                <button 
-                    @click="scrollDown" 
-                    class="hidden sm:block absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-bold py-2 px-4 sm:px-6 md:px-8 rounded-full hover:bg-yellow-500 transition text-base sm:text-lg">
-                    Давай знайомитись
+                <!-- Нижня жовта стрілочка (desktop only) -->
+                <button
+                    v-if="showArrow"
+                    @click="scrollDown"
+                    class="hidden sm:flex fixed z-50 bottom-5 left-1/2 transform -translate-x-1/2 transition w-20 h-20 items-center justify-center hover:scale-110">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </button>
             </main>
         </div>
