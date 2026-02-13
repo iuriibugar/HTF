@@ -92,43 +92,51 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
             <!-- Тип тренування + Назва -->
             <div>
-              <label class="block text-sm font-semibold text-white mb-2">Тип тренування *</label>
+              <label :class="['block text-sm font-semibold mb-2', training.error && !training.type ? 'text-red-500' : 'text-white']">Тип тренування *</label>
               <div class="flex gap-2">
-                <CustomDropdown
-                  v-model="training.type"
-                  :options="trainingTypes"
-                  placeholder="Тип тренування *"
-                  :hasError="!!(training.error && !training.type)"
-                />
-                <CustomDropdown
-                  v-model="training.name"
-                  :options="getTrainingNames(training.type)"
-                  placeholder="Назва тренування *"
-                  :hasError="!!(training.error && !training.name)"
-                  :allowCustom="true"
-                />
+                <div class="flex-1">
+                  <CustomDropdown
+                    v-model="training.type"
+                    :options="trainingTypes"
+                    placeholder="Тип тренування *"
+                    :hasError="!!(training.error && !training.type)"
+                  />
+                  <p v-if="training.error && !training.type" class="text-red-500 text-xs mt-1">Обов'язкове поле</p>
+                </div>
+                <div class="flex-1">
+                  <CustomDropdown
+                    v-model="training.name"
+                    :options="getTrainingNames(training.type)"
+                    placeholder="Назва тренування *"
+                    :hasError="!!(training.error && !training.name)"
+                    :allowCustom="true"
+                  />
+                  <p v-if="training.error && !training.name" class="text-red-500 text-xs mt-1">Обов'язкове поле</p>
+                </div>
               </div>
             </div>
 
             <!-- Складність -->
             <div>
-              <label class="block text-sm font-semibold text-white mb-2">Складність *</label>
+              <label :class="['block text-sm font-semibold mb-2', training.error && !training.difficulty ? 'text-red-500' : 'text-white']">Складність *</label>
               <CustomDropdown
                 v-model="training.difficulty"
                 :options="getDifficultyLevels(training.type)"
                 placeholder="Складність *"
                 :hasError="!!(training.error && !training.difficulty)"
               />
+              <p v-if="training.error && !training.difficulty" class="text-red-500 text-xs mt-1">Обов'язкове поле: виберіть складність</p>
             </div>
 
             <!-- Час початку -->
             <div>
-              <label class="block text-sm font-semibold text-white mb-2">Час початку *</label>
+              <label :class="['block text-sm font-semibold mb-2', training.error && !training.time ? 'text-red-500' : 'text-white']">Час початку *</label>
               <input 
                 v-model="training.time" 
                 type="time" 
                 :class="['w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
                          training.error && !training.time ? 'border-red-500' : 'border-white hover:border-yellow-400']" />
+              <p v-if="training.error && !training.time" class="text-red-500 text-xs mt-1">Обов'язкове поле: вкажіть час</p>
             </div>
 
             <!-- Платне тренування -->
@@ -143,7 +151,7 @@
 
             <!-- Адреса -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-white mb-2">Адреса *</label>
+              <label :class="['block text-sm font-semibold mb-2', training.error && !training.address ? 'text-red-500' : 'text-white']">Адреса *</label>
               <div class="flex gap-2">
                 <CustomDropdown
                   v-model="training.address"
@@ -160,6 +168,7 @@
                   </svg>
                 </button>
               </div>
+              <p v-if="training.error && !training.address" class="text-red-500 text-xs mt-1">Обов'язкове поле</p>
             </div>
           </div>
         </div>
@@ -426,7 +435,6 @@ async function generateSchedule() {
   
   daysOfWeek.value.forEach(day => {
     day.trainings.forEach(training => {
-      training.error = false
       if (!training.name || !training.type || !training.difficulty || !training.time || !training.address) {
         training.error = true
         hasErrors = true
@@ -747,7 +755,6 @@ async function saveScheduleToDatabase() {
   let hasErrors = false
   daysOfWeek.value.forEach(day => {
     day.trainings.forEach(training => {
-      training.error = false
       if (!training.name || !training.type || !training.difficulty || !training.time || !training.address) {
         training.error = true
         hasErrors = true
@@ -815,5 +822,26 @@ async function saveScheduleToDatabase() {
 
 onMounted(() => {
   loadAllSchedules()
+})
+
+// Watch for changes to training fields and clear the error flag only when the training becomes valid
+watch(daysOfWeek, () => {
+  daysOfWeek.value.forEach(day => {
+    day.trainings.forEach(training => {
+      if (training.error) {
+        const valid = training.name && training.type && training.difficulty && training.time && training.address
+        if (valid) {
+          training.error = false
+        }
+      }
+    })
+  })
+}, { deep: true })
+
+// Watch week start/end dates to clear weekYearError when both are set
+watch([weekStartDate, weekEndDate], ([start, end]) => {
+  if (start && end) {
+    weekYearError.value = false
+  }
 })
 </script>
