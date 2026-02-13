@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${bgImage})` }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? 'auto' : 'cover' }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
