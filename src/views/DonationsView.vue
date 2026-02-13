@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? 'auto' : 'cover' }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? (viewportW + 'px ' + viewportH + 'px') : 'cover' }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -107,10 +107,14 @@ import { getAllDonations } from '@/services/donationService'
 const loading = ref(false)
 const donations = ref([])
 const isMobile = ref(false)
+const viewportW = ref(0)
+const viewportH = ref(0)
 const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
 
 function _checkMobile() {
-  isMobile.value = window.innerWidth < 768
+  viewportW.value = window.innerWidth
+  viewportH.value = window.innerHeight
+  isMobile.value = viewportW.value < 768
 }
 
 // Динамічні класи сітки залежно від кількості донатів

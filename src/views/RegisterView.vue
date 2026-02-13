@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? 'auto' : 'cover' }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? (viewportW + 'px ' + viewportH + 'px') : 'cover' }">
     <!-- Затемнення -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -223,10 +223,14 @@ const submitted = ref(false)
 const isLoggingIn = ref(false)
 
 const isMobile = ref(false)
+const viewportW = ref(0)
+const viewportH = ref(0)
 const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
 
 function _checkMobile() {
-  isMobile.value = window.innerWidth < 768
+  viewportW.value = window.innerWidth
+  viewportH.value = window.innerHeight
+  isMobile.value = viewportW.value < 768
 }
 
 onMounted(() => {
