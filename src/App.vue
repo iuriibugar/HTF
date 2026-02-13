@@ -28,8 +28,6 @@ async function checkVersionUpdate() {
       showUpdatePopup.value = true
     }
     
-    await initializeVersion()
-    
   } catch (error) {
     console.error('Помилка при перевірці версії:', error)
   }
@@ -43,6 +41,8 @@ function handleCloseUpdatePopup() {
 }
 
 onMounted(async () => {
+  // Initialize version storage on first load, then check for updates
+  await initializeVersion()
   checkVersionUpdate()
 
   versionCheckInterval = setInterval(() => {

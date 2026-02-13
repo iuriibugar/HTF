@@ -47,7 +47,8 @@ export async function updateVersionInDatabase(version) {
  * Отримати версію з localStorage
  */
 export function getLocalVersion() {
-  return localStorage.getItem('appVersion') || '1.0.0'
+  // Return null when no version stored so callers can detect first load
+  return localStorage.getItem('appVersion')
 }
 
 /**
@@ -64,7 +65,9 @@ export async function initializeVersion() {
   try {
     const remoteVersion = await getLatestVersion()
     
-    if (remoteVersion) {
+    // On first load only: set local version if none exists yet
+    const localVersion = getLocalVersion()
+    if (!localVersion && remoteVersion) {
       setLocalVersion(remoteVersion)
     }
   } catch (error) {
@@ -79,8 +82,9 @@ export async function checkForUpdates() {
   try {
     const localVersion = getLocalVersion()
     const remoteVersion = await getLatestVersion()
-    
-    const hasUpdate = remoteVersion && localVersion !== remoteVersion
+
+    // If no local version stored yet, treat as no update (first-load should be handled by initializeVersion)
+    const hasUpdate = remoteVersion && localVersion && localVersion !== remoteVersion
     
     return {
       hasUpdate,

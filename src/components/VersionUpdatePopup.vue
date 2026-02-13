@@ -91,13 +91,52 @@ const handleBackdropClick = () => {
 const handleUpdate = async () => {
   isUpdating.value = true
   try {
+    // Persist new version locally
     setLocalVersion(props.remoteVersion)
     emit('update')
-    
+
+    // 1) Unregister service workers (if any) so they stop controlling pages
+    if ('serviceWorker' in navigator) {
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations()
+        await Promise.all(regs.map(r => r.unregister()))
+      } catch (swErr) {
+        console.warn('SW unregister failed', swErr)
+      }
+    }
+
+    // 2) Clear Cache Storage
+    if ('caches' in window) {
+      try {
+        const keys = await caches.keys()
+        await Promise.all(keys.map(k => caches.delete(k)))
+      } catch (cacheErr) {
+        console.warn('Clearing caches failed', cacheErr)
+      }
+    }
+
+    // 3) Clear cookies accessible from JS (won't affect HttpOnly cookies)
+    try {
+      document.cookie.split(';').forEach((c) => {
+        const name = c.split('=')[0].trim()
+        // Expire cookie for root path
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      })
+    } catch (cookieErr) {
+      console.warn('Clearing cookies failed', cookieErr)
+    }
+
+    // Optionally clear session-only storage to avoid stale app state, but preserve app version
+    try { sessionStorage.clear() } catch (e) {}
+
+    // Ensure app version is preserved after clearing storages so the app doesn't immediately report an update
+    try { setLocalVersion(props.remoteVersion) } catch (e) {}
+
+    // Give browser a short moment, then navigate with cache-busting query
     setTimeout(() => {
       const currentUrl = window.location.href.split('?')[0]
-      window.location.href = currentUrl + '?v=' + Date.now() + '#reload'
-    }, 500)
+      window.location.href = currentUrl + '?v=' + Date.now() + '#reloaded'
+    }, 300)
   } catch (error) {
     console.error('Помилка при оновленні версії:', error)
     isUpdating.value = false
