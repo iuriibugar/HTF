@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${backgroundImage})` }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed" :style="{ backgroundImage: `url(${bgImage})` }">
     <!-- Затемнення -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -191,7 +191,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { auth } from '@/firebase'
 import { signInWithPopup } from 'firebase/auth'
 import { googleProvider } from '@/firebase'
@@ -201,6 +201,7 @@ import HeaderWrapper from '../components/HeaderWrapper.vue'
 import Footer from '../components/htfFooter.vue'
 import { createOrUpdateUserProfile, registerNewUser } from '@/services/userService'
 import backgroundImage from '@/assets/background.png'
+import backgroundMob from '@/assets/backgroundMob.png'
 import { navigateToHome } from '@/utils/navigation'
 
 const router = useRouter()
@@ -221,6 +222,13 @@ const error = ref('')
 const submitted = ref(false)
 const isLoggingIn = ref(false)
 
+const isMobile = ref(false)
+const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
+
+function _checkMobile() {
+  isMobile.value = window.innerWidth < 768
+}
+
 onMounted(() => {
   // Перевіряємо чи користувач авторизований
   onAuthStateChanged(auth, (user) => {
@@ -232,6 +240,12 @@ onMounted(() => {
       googleEmail.value = ''
     }
   })
+  _checkMobile()
+  window.addEventListener('resize', _checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', _checkMobile)
 })
 
 async function loginWithGoogle() {

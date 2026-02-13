@@ -177,34 +177,38 @@ function toggleApprovalTooltip() {
             <ul class="flex flex-wrap justify-center space-x-4 text-sm md:text-base">
                 <li><router-link to="/schedule" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Розклад</router-link></li>
                 <li><router-link to="/donations" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Допомога ЗСУ</router-link></li>
-                <li><router-link v-if="!isAuthenticated" to="/login" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Логін</router-link></li>
+                <li><router-link v-if="!isAuthenticated" to="/login" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400"></router-link></li>
             </ul>
         </div>
 
         <!-- Мобільне меню (видимо коли відкрито) -->
-        <div v-if="isMobileMenuOpen" class="md:hidden w-full bg-opacity-95 rounded-lg p-4 space-y-3">
-            <router-link 
-                to="/schedule" 
-                class="block menu-link font-bold hover:text-yellow-400 text-center py-2"
-                active-class="text-yellow-400"
-                @click="closeMenu">
-                Розклад
-            </router-link>
-            <router-link 
-                to="/donations" 
-                class="block menu-link font-bold hover:text-yellow-400 text-center py-2"
-                active-class="text-yellow-400"
-                @click="closeMenu">
-                Допомога ЗСУ
-            </router-link>
-            <router-link 
-                v-if="!isAuthenticated"
-                to="/login" 
-                class="block menu-link font-bold hover:text-yellow-400 text-center py-2"
-                active-class="text-yellow-400"
-                @click="closeMenu">
-                Логін
-            </router-link>
+        <div v-if="isMobileMenuOpen" class="md:hidden w-full">
+            <div class="bg-gray-800/70 border-2 border-yellow-400 rounded-lg p-3 space-y-2">
+                <router-link
+                    to="/schedule"
+                    class="block menu-link font-bold text-center py-3"
+                    active-class="text-yellow-400"
+                    @click="closeMenu">
+                    Розклад
+                </router-link>
+
+                <router-link
+                    to="/donations"
+                    class="block menu-link font-bold text-center py-3"
+                    active-class="text-yellow-400"
+                    @click="closeMenu">
+                    Допомога ЗСУ
+                </router-link>
+
+                <router-link
+                    v-if="!isAuthenticated"
+                    to="/login"
+                    class="block menu-link font-bold text-center py-3"
+                    active-class="text-yellow-400"
+                    @click="closeMenu">
+                    Логін
+                </router-link>
+            </div>
         </div>
 
         <!-- Кнопки для десктопа -->

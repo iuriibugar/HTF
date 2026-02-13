@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${backgroundImage})` }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${bgImage})` }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -145,10 +145,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import HeaderWrapper from '../components/HeaderWrapper.vue'
 import Footer from '../components/htfFooter.vue'
 import backgroundImage from '@/assets/background.png'
+import backgroundMob from '@/assets/backgroundMob.png'
 import { getScheduleForWeek } from '@/services/scheduleService'
 import { getScheduleRegistrations } from '@/services/registrationService'
 
@@ -156,6 +157,12 @@ const loading = ref(true)
 const schedule = ref(null)
 const registrations = ref([])
 const visibleParticipants = ref(new Set())
+const isMobile = ref(false)
+const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
+
+function _checkMobile() {
+  isMobile.value = window.innerWidth < 768
+}
 
 // Отримати дати поточного тижня (понеділок - неділя)
 const getCurrentWeekDates = () => {
@@ -317,6 +324,12 @@ const loadRegistrations = async (scheduleId) => {
 
 // Завантажити при монтуванні
 onMounted(() => {
+  _checkMobile()
+  window.addEventListener('resize', _checkMobile)
   loadCurrentWeekSchedule()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', _checkMobile)
 })
 </script>

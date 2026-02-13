@@ -3,26 +3,27 @@
     <div 
       v-if="visible"
       :class="[
-        'fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md rounded-lg shadow-2xl p-4 flex items-start gap-3',
-        'transition-all duration-300',
+        'fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md rounded-xl shadow-2xl p-4 flex items-start gap-3 border-2 transition-all duration-300',
         notificationClasses
       ]"
+      role="status"
+      aria-live="polite"
     >
       <!-- Іконка -->
-      <div class="flex-shrink-0 text-2xl">
-        {{ icon }}
+      <div :class="iconClasses">
+        <span class="text-lg">{{ icon }}</span>
       </div>
       
       <!-- Контент -->
       <div class="flex-1">
-        <h4 v-if="title" class="font-bold text-lg mb-1">{{ title }}</h4>
-        <p class="text-sm">{{ message }}</p>
+        <h4 v-if="title" class="font-bold text-lg mb-1 text-yellow-400">{{ title }}</h4>
+        <p class="text-sm text-gray-300">{{ message }}</p>
       </div>
       
       <!-- Кнопка закриття -->
       <button 
         @click="close"
-        class="flex-shrink-0 text-2xl opacity-60 hover:opacity-100 transition-opacity"
+        class="flex-shrink-0 text-2xl opacity-70 hover:opacity-100 transition-opacity text-yellow-400"
       >
         ×
       </button>
@@ -65,11 +66,11 @@ let timeoutId = null
 // Класи для різних типів нотифікацій
 const notificationClasses = computed(() => {
   const classes = {
-    success: 'bg-green-50 border-l-4 border-green-500 text-green-800',
-    warning: 'bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800',
-    error: 'bg-red-50 border-l-4 border-red-500 text-red-800'
+    success: 'bg-slate-950 border-yellow-400 text-white',
+    warning: 'bg-slate-950 border-yellow-400 text-yellow-400',
+    error: 'bg-slate-950 border-red-500 text-red-400'
   }
-  return classes[props.type]
+  return classes[props.type] || classes.success
 })
 
 // Іконки для різних типів
@@ -80,6 +81,14 @@ const icon = computed(() => {
     error: '❌'
   }
   return icons[props.type]
+})
+
+const iconClasses = computed(() => {
+  const base = 'flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center'
+  if (props.type === 'success') return base + ' bg-yellow-400 text-slate-900'
+  if (props.type === 'warning') return base + ' bg-yellow-400 text-slate-900'
+  if (props.type === 'error') return base + ' bg-red-500 text-white'
+  return base + ' bg-yellow-400 text-slate-900'
 })
 
 // Закрити нотифікацію

@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-screen bg-cover bg-center bg-fixed overflow-hidden" :style="{ backgroundImage: `url(${backgroundImage})` }">
+  <div class="relative h-screen bg-cover bg-center bg-fixed overflow-hidden" :style="{ backgroundImage: `url(${bgImage})` }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-40"></div>
 
@@ -144,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { auth } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useRoute, useRouter } from 'vue-router'
@@ -157,9 +157,11 @@ import TrainingRegistration from './cabinet/user/TrainingRegistration.vue'
 import UserProfile from './cabinet/user/UserProfile.vue'
 import Statistics from './cabinet/user/Statistics.vue'
 import backgroundImage from '@/assets/background.png'
+import backgroundMob from '@/assets/backgroundMob.png'
 import { isAdminUser, logout } from '@/services/authService'
 import { getUserProfile } from '@/services/userService'
 import { navigateToHome } from '@/utils/navigation'
+import { showLoader, hideLoader } from '@/stores/loaderStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -182,6 +184,12 @@ const trainingStats = ref({
 })
 const userAmount = ref(0)
 const userDiscount = ref(null)
+const isMobile = ref(false)
+const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
+
+function _checkMobile() {
+  isMobile.value = window.innerWidth < 768
+}
 
 const ADMIN_EMAILS = [
   'kulikalovdenis@gmail.com',
@@ -227,6 +235,7 @@ const currentComponent = computed(() => {
 // Функція для завантаження профілю користувача
 async function loadUserProfile(userId) {
   try {
+    showLoader()
     const userProfile = await getUserProfile(userId)
     if (userProfile) {
       isApproved.value = userProfile.isApproved
@@ -247,6 +256,8 @@ async function loadUserProfile(userId) {
     isApproved.value = false
     userAmount.value = 0
     userDiscount.value = null
+  } finally {
+    hideLoader()
   }
 }
 
@@ -314,6 +325,12 @@ onMounted(() => {
       }
     }
   })
+  _checkMobile()
+  window.addEventListener('resize', _checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', _checkMobile)
 })
 
 async function logoutHandler() {

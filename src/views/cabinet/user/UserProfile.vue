@@ -212,6 +212,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { useRoute } from 'vue-router'
 import { getUserProfile, updateUserProfile } from '@/services/userService'
 import Notification from '@/components/Notification.vue'
+import { showLoader, hideLoader } from '@/stores/loaderStore'
 
 const route = useRoute()
 
@@ -251,8 +252,10 @@ function showNotification(type, message) {
 // Завантажити дані користувача
 const loadUserData = async () => {
   try {
+    showLoader()
     const user = auth.currentUser
     if (!user) {
+      hideLoader()
       return
     }
 
@@ -284,12 +287,16 @@ const loadUserData = async () => {
       message: '❌ Помилка завантаження даних'
     }
   }
+  finally {
+    hideLoader()
+  }
 }
 
 // Зберегти дані
 const saveProfile = async () => {
   try {
     isSaving.value = true
+    showLoader()
 
     const user = auth.currentUser
     if (!user) {
@@ -342,6 +349,7 @@ const saveProfile = async () => {
     }
   } finally {
     isSaving.value = false
+    hideLoader()
   }
 }
 

@@ -131,6 +131,7 @@
 import { ref } from 'vue'
 import { auth } from '@/firebase'
 import { updateUserProfile } from '@/services/userService'
+import { showLoader, hideLoader } from '@/stores/loaderStore'
 
 const formData = ref({
   firstName: '',
@@ -149,6 +150,7 @@ async function submitRegistration() {
   try {
     error.value = ''
     isSubmitting.value = true
+    showLoader()
 
     const user = auth.currentUser
     if (!user) {
@@ -186,6 +188,7 @@ async function submitRegistration() {
     console.error('Помилка реєстрації:', err)
   } finally {
     isSubmitting.value = false
+    hideLoader()
   }
 }
 </script>

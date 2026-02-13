@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${backgroundImage})` }">
+  <div class="relative min-h-screen bg-cover bg-center bg-fixed overflow-y-auto" :style="{ backgroundImage: `url(${bgImage})` }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -97,14 +97,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import HeaderWrapper from '@/components/HeaderWrapper.vue'
 import Footer from '@/components/htfFooter.vue'
 import backgroundImage from '@/assets/background.png'
+import backgroundMob from '@/assets/backgroundMob.png'
 import { getAllDonations } from '@/services/donationService'
 
 const loading = ref(false)
 const donations = ref([])
+const isMobile = ref(false)
+const bgImage = computed(() => isMobile.value ? backgroundMob : backgroundImage)
+
+function _checkMobile() {
+  isMobile.value = window.innerWidth < 768
+}
 
 // Динамічні класи сітки залежно від кількості донатів
 const gridClasses = computed(() => {
@@ -149,6 +156,12 @@ function formatDate(dateStr) {
 }
 
 onMounted(() => {
+  _checkMobile()
+  window.addEventListener('resize', _checkMobile)
   loadDonations()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', _checkMobile)
 })
 </script>
