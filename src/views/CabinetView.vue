@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-screen bg-cover bg-center bg-fixed overflow-hidden" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? (viewportW + 'px ' + viewportH + 'px') : 'cover' }">
+  <div class="relative h-screen bg-cover bg-center bg-fixed overflow-hidden" :style="{ backgroundImage: `url(${bgImage})`, backgroundSize: isMobile ? (viewportW + 'px ' + viewportH + 'px') : 'cover', backgroundRepeat: 'no-repeat', backgroundAttachment: isMobile ? 'scroll' : 'fixed', backgroundPosition: isMobile ? 'center top' : 'center' }">
     <!-- Затемнення фону -->
     <div class="absolute inset-0 bg-black opacity-40"></div>
 
