@@ -59,7 +59,7 @@
                     <div class="flex-1 w-full">
                       <!-- Назва, складність, оплата -->
                       <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                        <span class="text-lg">{{ getTypeEmoji(training.type) }}</span>
+                        <img :src="getTypeEmoji(training.type)" alt="icon" class="w-6 h-6" />
                         <h3 class="text-base sm:text-lg font-bold text-yellow-400">{{ training.name }}</h3>
                         <span 
                           :class="[
@@ -88,7 +88,7 @@
                           <span>{{ training.address }}</span>
                         </div>
                         <div class="flex items-center gap-1">
-                          <span>🏃</span>
+                          <img :src="getTypeEmoji(training.type)" :alt="training.type" class="w-4 h-4 object-contain" />
                           <span>{{ training.type }}</span>
                         </div>
                       </div>
@@ -148,7 +148,6 @@
 import { ref, computed, onMounted } from 'vue'
 import HeaderWrapper from '../components/HeaderWrapper.vue'
 import Footer from '../components/htfFooter.vue'
-import { getTrainingIcon } from '../data/trainingConfig.js'
 import backgroundImage from '@/assets/background.png'
 import { getScheduleForWeek } from '@/services/scheduleService'
 import { getScheduleRegistrations } from '@/services/registrationService'
@@ -216,7 +215,23 @@ const groupedTrainings = computed(() => {
 
 // Іконка для типу тренування (з trainingConfig)
 const getTypeEmoji = (type) => {
-  return getTrainingIcon(type)
+  const iconMap = {
+    'swimming': new URL('@/assets/trainingIcons/icon-swimming.png', import.meta.url).href,
+    'running': new URL('@/assets/trainingIcons/icon-running.png', import.meta.url).href,
+    'cycling': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
+    'other': new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href,
+    // Ukrainian names
+    'плавання': new URL('@/assets/trainingIcons/icon-swimming.png', import.meta.url).href,
+    'біг': new URL('@/assets/trainingIcons/icon-running.png', import.meta.url).href,
+    'велосипед': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
+    'велотренування': new URL('@/assets/trainingIcons/icon-cycling.png', import.meta.url).href,
+    'інше': new URL('@/assets/trainingIcons/icon-other.png', import.meta.url).href
+  };
+
+  if (!type) return iconMap['other'];
+
+  const lowerType = String(type).toLowerCase().trim();
+  return iconMap[lowerType] || iconMap['other'];
 }
 
 // Отримати перший символ імені для аватара

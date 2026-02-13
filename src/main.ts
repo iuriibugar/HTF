@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
       console.log('Service Worker зареєстрований:', registration)
     })
     .catch(error => {
-      console.error('Помилка реєстрації Service Worker:', error)
+      // Removed unnecessary console logging
     })
 }
 
