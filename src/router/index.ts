@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import CabinetView from '../views/CabinetView.vue'
 import ScheduleView from '../views/ScheduleView.vue'
 import DonationsView from '../views/DonationsView.vue'
+import TrainersView from '../views/TrainersView.vue'
 import { getCurrentUser } from '@/services/authService'
 import { getUserProfile } from '@/services/userService'
 
@@ -35,6 +36,11 @@ const router = createRouter({
       path: '/donations',
       name: 'donations',
       component: DonationsView,
+    },
+    {
+      path: '/trainers',
+      name: 'trainers',
+      component: TrainersView,
     },
     {
       path: '/user',
@@ -89,6 +95,13 @@ const router = createRouter({
       component: CabinetView,
       meta: { requiresAuth: true, requiresAdmin: true },
       props: { section: 'donations-manager' }
+    },
+    {
+      path: '/admin/trainers',
+      name: 'admin-trainers',
+      component: CabinetView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      props: { section: 'trainers-manager' }
     },
     {
       path: '/cabinet',

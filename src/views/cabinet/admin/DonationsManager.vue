@@ -17,30 +17,27 @@
     <!-- Slot для форми -->
     <template #form>
       <!-- Завантаження зображення -->
-      <div class="border-2 border-dashed border-white rounded-xl p-6 text-center hover:border-yellow-400 transition bg-gray-700/50">
-        <div v-if="imagePreview" class="mb-4">
-          <img :src="imagePreview" alt="Preview" class="max-h-64 mx-auto rounded-lg shadow-md" />
+      <!-- Зображення -->
+      <div>
+        <label class="block text-sm font-semibold text-white mb-2">📷 Фото</label>
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/jpeg,image/png"
+          @change="handleImageUpload"
+          class="w-full px-4 py-2 bg-gray-700 border border-white rounded-lg text-white file:text-yellow-400 file:bg-gray-600 file:border-0 file:px-3 file:py-1 focus:outline-none focus:border-yellow-400 transition"
+        />
+        <!-- Попередження -->
+        <div class="mt-2 p-3 bg-yellow-400/20 border border-yellow-400/50 rounded-lg">
+          <p class="text-yellow-300 text-sm">⚠️ Завантажте зображення (JPG, PNG) макс. 2MB</p>
+        </div>
+        <!-- Превью -->
+        <div v-if="imagePreview" class="mt-3 h-32 bg-gray-600 rounded-lg flex items-center justify-center overflow-hidden relative">
+          <img :src="imagePreview" alt="Preview" class="max-w-full max-h-full object-contain rounded-lg" />
           <button 
             @click="removeImage"
-            class="mt-4 px-4 py-2 border-2 border-white text-white rounded-lg transition hover:border-red-400 hover:text-red-400">
-            ❌ Видалити зображення
-          </button>
-        </div>
-        <div v-else>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-white mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <p class="text-white mb-2">Завантажте зображення (PNG)</p>
-          <input 
-            ref="fileInput"
-            type="file" 
-            accept="image/png"
-            @change="handleImageUpload"
-            class="hidden" />
-          <button 
-            @click="$refs.fileInput.click()"
-            class="px-6 py-3 border-2 border-white text-white rounded-lg transition">
-            📁 Вибрати файл
+            class="absolute top-2 right-2 px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs transition">
+            ❌ Видалити
           </button>
         </div>
       </div>
@@ -52,6 +49,7 @@
           v-model="formData.title"
           type="text"
           placeholder="Наприклад: Підтримка ЗСУ"
+          autocomplete="off"
           :class="['w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
                    errors.title ? 'border-red-500' : 'border-white']" />
         <p v-if="errors.title" class="text-yellow-400 text-sm mt-1 font-semibold">⚠️ {{ errors.title }}</p>
@@ -76,6 +74,7 @@
           v-model="formData.link"
           type="url"
           placeholder="https://send.monobank.ua/..."
+          autocomplete="off"
           :class="['w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 bg-gray-700 text-white',
                    errors.link ? 'border-red-500' : 'border-white']" />
         <p v-if="errors.link" class="text-yellow-400 text-sm mt-1 font-semibold">⚠️ {{ errors.link }}</p>
@@ -89,6 +88,7 @@ import { ref, onMounted } from 'vue'
 import ItemsManager from '@/components/ItemsManager.vue'
 import { getAllDonations, createDonation, updateDonation, deleteDonation } from '@/services/donationService'
 import { showLoader, hideLoader } from '@/stores/loaderStore'
+import { validateImage } from '@/utils/imageValidation'
 
 // Props/Emits
 const emit = defineEmits(['show-notification'])
@@ -186,14 +186,11 @@ function handleImageUpload(event) {
   const file = event.target.files[0]
   if (!file) return
   
-  if (!file.type.includes('png')) {
-    emit('show-notification', 'warning', 'Будь ласка, завантажте файл формату PNG', 'Невірний формат')
-    return
-  }
-  
-  // Перевірка розміру (макс 1MB для Base64)
-  if (file.size > 1024 * 1024) {
-    emit('show-notification', 'warning', 'Зображення занадто велике. Максимум 1MB', 'Великий розмір')
+  // Валідуємо файл (тип та розмір)
+  const validation = validateImage(file)
+  if (!validation.isValid) {
+    emit('show-notification', 'warning', validation.error, 'Помилка файлу')
+    event.target.value = '' // Очищуємо input
     return
   }
   
