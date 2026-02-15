@@ -87,10 +87,6 @@
                           <span>📍</span>
                           <span>{{ training.address }}</span>
                         </div>
-                        <div class="flex items-center gap-1">
-                          <img :src="getTypeEmoji(training.type)" :alt="training.type" class="w-4 h-4 object-contain" />
-                          <span>{{ training.type }}</span>
-                        </div>
                       </div>
                     </div>
 
