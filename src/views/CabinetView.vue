@@ -91,6 +91,12 @@
                        activeSection === 'donations-manager' ? 'bg-yellow-400 text-black border-yellow-400' : 'hover:border-yellow-400 hover:text-yellow-400']">
               <span>💰 Управління донатами</span>
             </button>
+            <button 
+              @click="router.push('/admin/trainers')"
+              :class="['w-full text-left px-4 py-3 rounded-lg mb-2 transition border-2 border-white text-white', 
+                       activeSection === 'trainers-manager' ? 'bg-yellow-400 text-black border-yellow-400' : 'hover:border-yellow-400 hover:text-yellow-400']">
+              <span>👥 Тренерський склад</span>
+            </button>
           </div>
           <div>
             <h3 class="text-sm font-bold text-yellow-400 uppercase mb-3">Загальне</h3>
@@ -152,6 +158,7 @@ import HeaderWrapper from '../components/HeaderWrapper.vue'
 import NotificationComponent from '../components/Notification.vue'
 import FormSchedule from './cabinet/admin/FormSchedule.vue'
 import DonationsManager from './cabinet/admin/DonationsManager.vue'
+import TrainersManager from './cabinet/admin/TrainersManager.vue'
 import UsersManager from './cabinet/admin/UsersManager.vue'
 import TrainingRegistration from './cabinet/user/TrainingRegistration.vue'
 import UserProfile from './cabinet/user/UserProfile.vue'
@@ -228,6 +235,7 @@ const currentComponent = computed(() => {
   const components = {
     'form-schedule': FormSchedule,
     'donations-manager': DonationsManager,
+    'trainers-manager': TrainersManager,
     'users-manager': UsersManager,
     'training-registration': TrainingRegistration,
     'user-profile': UserProfile,
@@ -284,14 +292,10 @@ watch(() => route.path, (newPath) => {
     activeSection.value = 'form-schedule'
   } else if (newPath === '/admin/donations') {
     activeSection.value = 'donations-manager'
-  } else if (newPath.includes('/user')) {
-    activeSection.value = 'training-registration'
-  } else if (newPath.includes('/admin')) {
-    activeSection.value = 'form-schedule'
-  } else {
-    activeSection.value = 'training-registration'
+  } else if (newPath === '/admin/trainers') {
+    activeSection.value = 'trainers-manager'
   }
-}, { immediate: true })
+})
 
 onMounted(() => {
   onAuthStateChanged(auth, async (user) => {
@@ -309,8 +313,11 @@ onMounted(() => {
         return
       }
       
-      // Встановлюємо початкову секцію залежно від маршруту
-      if (route.path === '/user/registration') {
+      // Встановлюємо активну секцію залежно від маршруту
+      // Точні шляхи перевіряються першими
+      if (route.path === '/user/profile') {
+        activeSection.value = 'user-profile'
+      } else if (route.path === '/user/registration') {
         activeSection.value = 'training-registration'
       } else if (route.path === '/user/statistics') {
         activeSection.value = 'statistics'
@@ -320,12 +327,11 @@ onMounted(() => {
         activeSection.value = 'form-schedule'
       } else if (route.path === '/admin/donations') {
         activeSection.value = 'donations-manager'
-      } else if (route.path.includes('/user')) {
-        activeSection.value = 'training-registration'
-      } else if (route.path.includes('/admin') && isAdmin.value) {
-        activeSection.value = 'form-schedule'
-      } else {
-        activeSection.value = 'training-registration'
+      } else if (route.path === '/admin/trainers') {
+        activeSection.value = 'trainers-manager'
+      } else if (route.path === '/cabinet' || route.path === '/admin') {
+        // При вході в /cabinet або /admin без конкретного розділу
+        activeSection.value = isAdmin.value ? 'users-manager' : 'training-registration'
       }
     }
   })
@@ -346,3 +352,31 @@ async function logoutHandler() {
   }
 }
 </script>
+
+<style scoped>
+/* Кастомний scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fbbf24; /* yellow-400 */
+  border-radius: 6px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b; /* yellow-500 */
+}
+
+/* Firefox */
+* {
+  scrollbar-color: #fbbf24 rgba(0, 0, 0, 0.3);
+  scrollbar-width: thin;
+}
+</style>

@@ -17,6 +17,18 @@ const isMobileMenuOpen = ref(false)
 const showNotification = ref(false)
 const showApprovalTooltip = ref(false)
 
+// Закрити мобільне меню
+const closeMenu = () => {
+    isMobileMenuOpen.value = false
+    document.body.style.overflow = 'auto'
+}
+
+// Переключити меню та керувати скролом
+const toggleMenu = () => {
+    isMobileMenuOpen.value = !isMobileMenuOpen.value
+    document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : 'auto'
+}
+
 const ADMIN_EMAILS = [
   'kulikalovdenis@gmail.com',
   'bugary20@gmail.com',
@@ -71,8 +83,8 @@ function joinClub() {
     router.push('/register')
 }
 
-function closeMenu() {
-    isMobileMenuOpen.value = false
+function toggleApprovalTooltip() {
+    showApprovalTooltip.value = !showApprovalTooltip.value
 }
 
 async function logoutHandler() {
@@ -86,10 +98,6 @@ async function logoutHandler() {
         console.error('Помилка виходу:', error)
     }
 }
-
-function toggleApprovalTooltip() {
-    showNotification.value = true
-}
 </script>
 
 <template>
@@ -98,10 +106,11 @@ function toggleApprovalTooltip() {
         <div class="flex md:hidden justify-between items-center w-full relative">
             <!-- Бургер меню (залів) -->
             <button 
-                @click="isMobileMenuOpen = !isMobileMenuOpen"
-                class="p-2 hover:bg-gray-700 rounded transition"
+                @click="toggleMenu"
+                class="p-2 hover:bg-gray-700 rounded transition transform duration-300"
+                :class="isMobileMenuOpen ? 'rotate-90' : 'rotate-0'"
                 title="Меню">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
@@ -176,25 +185,39 @@ function toggleApprovalTooltip() {
         <div class="hidden md:flex justify-center flex-1">
             <ul class="flex flex-wrap justify-center space-x-4 text-sm md:text-base">
                 <li><router-link to="/schedule" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Розклад</router-link></li>
+                <li><router-link to="/trainers" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Тренери</router-link></li>
                 <li><router-link to="/donations" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400">Допомога ЗСУ</router-link></li>
                 <li><router-link v-if="!isAuthenticated" to="/login" class="menu-link font-bold hover:text-yellow-400" active-class="text-yellow-400"></router-link></li>
             </ul>
         </div>
 
-        <!-- Мобільне меню (видимо коли відкрито) -->
-        <div v-if="isMobileMenuOpen" class="md:hidden w-full">
-            <div class="bg-gray-800/70 border-2 border-yellow-400 rounded-lg p-3 space-y-2">
+        <!-- Мобільне меню оверлей (поверх сторінки) -->
+        <transition name="menu-fade">
+            <div v-if="isMobileMenuOpen" class="md:hidden fixed inset-0 bg-black/50 z-40" @click="closeMenu"></div>
+        </transition>
+        
+        <!-- Мобільне меню (компактне) -->
+        <transition name="menu-slide">
+            <div v-if="isMobileMenuOpen" class="md:hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 w-11/12 bg-gray-800/50 backdrop-blur-md border-2 border-yellow-400 rounded-2xl shadow-lg p-3 space-y-1">
                 <router-link
                     to="/schedule"
-                    class="block menu-link font-bold text-center py-3"
+                    class="block menu-link font-bold text-center py-3 hover:text-yellow-400 transition hover:bg-gray-700 rounded-lg"
                     active-class="text-yellow-400"
                     @click="closeMenu">
                     Розклад
                 </router-link>
 
                 <router-link
+                    to="/trainers"
+                    class="block menu-link font-bold text-center py-3 hover:text-yellow-400 transition hover:bg-gray-700 rounded-lg"
+                    active-class="text-yellow-400"
+                    @click="closeMenu">
+                    Тренери
+                </router-link>
+
+                <router-link
                     to="/donations"
-                    class="block menu-link font-bold text-center py-3"
+                    class="block menu-link font-bold text-center py-3 hover:text-yellow-400 transition hover:bg-gray-700 rounded-lg"
                     active-class="text-yellow-400"
                     @click="closeMenu">
                     Допомога ЗСУ
@@ -203,13 +226,13 @@ function toggleApprovalTooltip() {
                 <router-link
                     v-if="!isAuthenticated"
                     to="/login"
-                    class="block menu-link font-bold text-center py-3"
+                    class="block menu-link font-bold text-center py-3 hover:text-yellow-400 transition hover:bg-gray-700 rounded-lg"
                     active-class="text-yellow-400"
                     @click="closeMenu">
                     Логін
                 </router-link>
             </div>
-        </div>
+        </transition>
 
         <!-- Кнопки для десктопа -->
         <div class="hidden md:flex md:flex-col gap-2 items-end md:items-center md:w-48 md:justify-end">
@@ -291,5 +314,28 @@ function toggleApprovalTooltip() {
 .menu-link {
     text-decoration: none;
     transition: color 0.3s;
+}
+
+/* Анімація оверлею */
+.menu-fade-enter-active,
+.menu-fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.menu-fade-enter-from,
+.menu-fade-leave-to {
+    opacity: 0;
+}
+
+/* Анімація меню слайд зверху */
+.menu-slide-enter-active,
+.menu-slide-leave-active {
+    transition: transform 0.3s ease;
+}
+
+.menu-slide-enter-from,
+.menu-slide-leave-to {
+    transform: translateY(-20px);
+    opacity: 0;
 }
 </style>

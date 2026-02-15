@@ -530,6 +530,145 @@ export const userAdminContracts = {
 }
 
 // ============================================================================
+// TRAINER SERVICE CONTRACTS
+// ============================================================================
+
+export const trainerContracts = {
+  /**
+   * GET /trainers - Отримати всіх тренерів
+   */
+  getAll: {
+    method: 'GET',
+    path: '/trainers',
+    request: null,
+    response: {
+      type: 'array',
+      schema: {
+        id: { type: 'string', description: 'Унікальний ID тренера' },
+        firstName: { type: 'string', description: 'Ім\'я тренера' },
+        lastName: { type: 'string', description: 'Прізвище тренера' },
+        imageBase64: { type: 'string', description: 'Фото в base64 форматі' },
+        description: { type: 'string', description: 'Опис та біографія' },
+        instagramLink: { type: 'string', description: 'Посилання на Instagram' },
+        order: { type: 'number', description: 'Порядковий номер для сортування' },
+        createdAt: { type: 'string', format: 'date-time', description: 'Дата створення' },
+        updatedAt: { type: 'string', format: 'date-time', description: 'Дата оновлення' }
+      }
+    },
+    example: {
+      request: null,
+      response: [
+        {
+          id: 'trainer_123',
+          firstName: 'Іван',
+          lastName: 'Петренко',
+          imageBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYA...',
+          description: 'Професійний тренер з плавання з 10+ років досвіду',
+          instagramLink: 'https://instagram.com/ivanpetrenko',
+          order: 1,
+          createdAt: '2026-01-01T10:00:00Z',
+          updatedAt: '2026-02-15T14:00:00Z'
+        }
+      ]
+    }
+  },
+
+  /**
+   * POST /trainers - Створити нового тренера
+   */
+  create: {
+    method: 'POST',
+    path: '/trainers',
+    request: {
+      type: 'object',
+      required: ['firstName', 'lastName', 'imageBase64', 'description'],
+      schema: {
+        firstName: { type: 'string', minLength: 1, maxLength: 100, description: 'Ім\'я' },
+        lastName: { type: 'string', minLength: 1, maxLength: 100, description: 'Прізвище' },
+        imageBase64: { type: 'string', description: 'Фото в base64 форматі (data:image/...)' },
+        description: { type: 'string', minLength: 10, maxLength: 2000, description: 'Опис' },
+        instagramLink: { type: 'string', format: 'uri', description: 'Посилання на Instagram (опціонально)' },
+        order: { type: 'number', description: 'Порядковий номер (опціонально)' }
+      }
+    },
+    response: {
+      type: 'object',
+      schema: {
+        id: { type: 'string', description: 'ID новоствореного тренера' }
+      }
+    },
+    example: {
+      request: {
+        firstName: 'Мар\'яна',
+        lastName: 'Леонідівна',
+        imageBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYA...',
+        description: 'Тренер з велоспорту. Чемпіонка України. Допоможе вам досягти рекордних результатів!',
+        instagramLink: 'https://instagram.com/mariana_sports',
+        order: 2
+      },
+      response: {
+        id: 'trainer_456'
+      }
+    }
+  },
+
+  /**
+   * PUT /trainers/:id - Оновити тренера
+   */
+  update: {
+    method: 'PUT',
+    path: '/trainers/:id',
+    request: {
+      type: 'object',
+      schema: {
+        firstName: { type: 'string', maxLength: 100 },
+        lastName: { type: 'string', maxLength: 100 },
+        imageBase64: { type: 'string' },
+        description: { type: 'string', maxLength: 2000 },
+        instagramLink: { type: 'string', format: 'uri' },
+        order: { type: 'number', description: 'Порядковий номер' }
+      }
+    },
+    response: {
+      type: 'object',
+      schema: {
+        success: { type: 'boolean' }
+      }
+    },
+    example: {
+      request: {
+        description: 'Оновлена біографія тренера...',
+        order: 3
+      },
+      response: {
+        success: true
+      }
+    }
+  },
+
+  /**
+   * DELETE /trainers/:id - Видалити тренера
+   */
+  delete: {
+    method: 'DELETE',
+    path: '/trainers/:id',
+    request: null,
+    response: {
+      type: 'object',
+      schema: {
+        success: { type: 'boolean' }
+      }
+    },
+    example: {
+      request: null,
+      response: {
+        success: true
+      }
+    }
+  }
+}
+
+// ============================================================================
 // REGISTRATION SERVICE CONTRACTS
 // ============================================================================
 
