@@ -34,6 +34,7 @@ export async function createOrUpdateUserProfile(uid, additionalData = {}) {
         email: user.email,
         displayName: user.displayName || null,
         photoURL: user.photoURL || null,
+        photoBase64: null,
         
         // Контроль доступу
         isApproved: isAdminUser ? true : false,
@@ -42,40 +43,30 @@ export async function createOrUpdateUserProfile(uid, additionalData = {}) {
         // Дані про реєстрацію
         emailVerified: user.emailVerified || false,
         status: 'active',
-        
-        // Віртуальні монети (для платежів, підписок, реєстрацій)
-        amount: 0,
-        
-        // Налаштування
-        notifications: {
-          email: additionalData.notifications?.email ?? true,
-          push: additionalData.notifications?.push ?? false,
-          trainingReminders: additionalData.notifications?.trainingReminders ?? true
-        },
+        isDeleted: false,
         
         // Персональні дані
         firstName: additionalData.firstName || null,
         lastName: additionalData.lastName || null,
         phone: additionalData.phone || null,
-        birthDate: additionalData.birthDate || null,
-        gender: additionalData.gender || null,
         city: additionalData.city || null,
-        address: additionalData.address || null,
-        postalDepartment: additionalData.postalDepartment || null,
-        emergencyContactName: additionalData.emergencyContactName || null,
-        emergencyContactPhone: additionalData.emergencyContactPhone || null,
-        phoneNumber: additionalData.phoneNumber || null,
-        bio: additionalData.bio || null,
         experienceLevel: additionalData.experienceLevel || null,
-        specialization: additionalData.specialization || null,
+        
+        // Баланс та знижки
+        amount: 0,
+        balanceUpdatedAt: null,
+        balanceUpdatedBy: null,
+        discount: null,
+        
+        // Адмін примітки
+        notes: null,
         
         // Системні дані
         registeredAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
         loginCount: 1,
-        notes: null,
-        deletedAt: null,
         updatedAt: new Date().toISOString(),
+        updatedBy: null,
         
         // Статистика тренувань
         trainingStats: {
@@ -83,7 +74,10 @@ export async function createOrUpdateUserProfile(uid, additionalData = {}) {
           cycling: { registered: 0 },
           running: { registered: 0 },
           other: { registered: 0 }
-        }
+        },
+        
+        // Підписки на тренування
+        subscriptions: []
       }
       
       // Зберігаємо новий профіль
@@ -96,7 +90,8 @@ export async function createOrUpdateUserProfile(uid, additionalData = {}) {
       const updateData = {
         lastLoginAt: new Date().toISOString(),
         loginCount: (existingData.loginCount || 0) + 1,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        updatedBy: null
       }
       
       // Оновлюємо ТІЛЬКИ поля останнього входу, всі інші дані залишаються
@@ -286,23 +281,13 @@ export async function updateUserProfile(uid, updateData) {
   try {
     const userRef = doc(db, 'users', uid)
     
-    // Дозволяємо оновлювати тільки певні поля
+    // Дозволяємо оновлювати тільки певні поля з контракту
     const allowedFields = [
       'firstName',
       'lastName',
       'phone',
-      'birthDate',
-      'gender',
       'city',
-      'address',
-      'postalDepartment',
-      'emergencyContactName',
-      'emergencyContactPhone',
-      'experienceLevel',
-      'specialization',
-      'bio',
-      'phoneNumber',
-      'notifications'
+      'experienceLevel'
     ]
     
     const filteredData = {}
@@ -314,6 +299,7 @@ export async function updateUserProfile(uid, updateData) {
     })
     
     filteredData.updatedAt = new Date().toISOString()
+    filteredData.updatedBy = null
     
     // Використовуємо setDoc з merge: true замість updateDoc
     // Це дозволяє створити документ якщо його немає
@@ -389,17 +375,18 @@ export async function updateUserBalance(uid, amount, adminUid, discountInfo = nu
 /**
  * Видалити користувача (soft delete - помічуємо як видаленого)
  * @param {string} uid - User ID
- * @param {string} adminUid - UID адміна
+ * @param {string} adminUid - UID адміна, який видаляє
+ * @param {string} reason - причина видалення (опціонально)
  */
-export async function deleteUser(uid, adminUid) {
+export async function deleteUser(uid, adminUid, reason = '') {
   try {
     const userRef = doc(db, 'users', uid)
     
     await updateDoc(userRef, {
-      deletedAt: new Date().toISOString(),
+      isDeleted: true,
+      notes: reason || 'Акаунт видалено',
       updatedAt: new Date().toISOString(),
-      updatedBy: adminUid,
-      status: 'inactive'
+      updatedBy: adminUid
     })
     
     return true
@@ -480,26 +467,17 @@ export async function registerNewUser(userData) {
       email: email,
       displayName: displayName || null,
       photoURL: photoURL || null,
+      photoBase64: null,
       
       // Контроль доступу
       isApproved: isAdminUser ? true : false,
       role: isAdminUser ? 'admin' : 'user',
       status: 'active',
+      isDeleted: false,
       
       // Дані з форми реєстрації
-      firstName: additionalData.firstName || undefined,
-      lastName: additionalData.lastName || undefined,
-      phone: additionalData.phone || undefined,
-      city: additionalData.city || undefined,
-      experienceLevel: additionalData.experienceLevel || undefined,
-      bio: additionalData.bio || undefined,
-      
-      // Налаштування
-      notifications: {
-        email: true,
-        push: false,
-        trainingReminders: true
-      },
+      firstName: additionalData.firstName || null,
+      phone: additionalData.phone || null,
       
       // Дати
       registeredAt: new Date().toISOString(),
@@ -510,18 +488,24 @@ export async function registerNewUser(userData) {
       emailVerified: false,
       loginCount: 1,
       notes: null,
-      deletedAt: null,
+      updatedBy: null,
       
-      // Віртуальні монети (для платежів, підписок, реєстрацій)
+      // Баланс та знижки
       amount: 0,
+      balanceUpdatedAt: null,
+      balanceUpdatedBy: null,
+      discount: null,
       
-      // Інформація про триатлон
+      // Статистика тренувань
       trainingStats: {
         swimming: { registered: 0 },
         cycling: { registered: 0 },
         running: { registered: 0 },
         other: { registered: 0 }
-      }
+      },
+      
+      // Підписки на тренування
+      subscriptions: []
     }
     
     // Видаляємо поля з undefined значеннями

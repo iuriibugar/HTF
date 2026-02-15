@@ -33,14 +33,14 @@
             v-for="item in items" 
             :key="item.id"
             class="bg-gray-700/50 border-2 rounded-lg p-4 hover:shadow-lg transition cursor-pointer"
-            :class="editingId === item.id ? 'border-yellow-400 shadow-lg' : 'border-white'">
+            :class="editingId === item.id ? 'border-yellow-400 shadow-lg' : 'border-white'"
             @click="$emit('edit', item)">
             
             <!-- Slot для кастомного відображення картки -->
             <slot name="item-card" :item="item">
               <!-- Дефолтне відображення -->
-              <div v-if="item.imageUrl || item.imageBase64" class="mb-3">
-                <img :src="item.imageUrl || item.imageBase64" alt="Item" class="w-full h-32 object-cover rounded-lg" />
+              <div v-if="item.imageUrl || item.imageBase64" class="mb-3 h-42 bg-gray-600 rounded-lg flex items-center justify-center overflow-hidden">
+                <img :src="item.imageUrl || item.imageBase64" alt="Item" class="max-w-full max-h-full object-contain rounded-lg" />
               </div>
               <div v-else class="mb-3 h-32 bg-gray-600 rounded-lg flex items-center justify-center">
                 <span class="text-gray-400">Без зображення</span>
