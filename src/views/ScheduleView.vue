@@ -60,25 +60,25 @@
                       <!-- Назва, складність, оплата -->
                       <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                         <img :src="getTypeEmoji(training.type)" alt="icon" class="w-6 h-6" />
-                        <h3 class="text-base sm:text-lg font-bold text-yellow-400">{{ training.name }}</h3>
+                        <h3 :class="['text-base sm:text-lg font-bold', isTrainingPassed(training) ? 'text-gray-600' : 'text-yellow-400']">{{ training.name }}</h3>
                         <span 
                           :class="[
                             'px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold',
-                            getDifficultyColor(training.difficulty)
+                            isTrainingPassed(training) ? 'bg-gray-400 text-black' : getDifficultyColor(training.difficulty)
                           ]"
                         >
                           {{ training.difficulty }}
                         </span>
                         <span 
                           v-if="training.isPaid"
-                          class="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold bg-yellow-400 text-black"
+                          :class="['px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-semibold', isTrainingPassed(training) ? 'bg-gray-400 text-black' : 'bg-yellow-400 text-black']"
                         >
                           💰 Платне
                         </span>
                       </div>
                       
                       <!-- Час, адреса, тип -->
-                      <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-300 text-xs sm:text-sm">
+                      <div :class="['flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm', isTrainingPassed(training) ? 'text-gray-600' : 'text-gray-300']">
                         <div class="flex items-center gap-1 flex-shrink-0">
                           <span>⏰</span>
                           <span class="font-semibold">{{ training.time }}</span>
@@ -98,7 +98,8 @@
                     <div class="flex-shrink-0 w-full sm:w-auto">
                       <button 
                         @click="toggleParticipants(training)"
-                        class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg transition-colors text-xs sm:text-sm font-semibold text-black"
+                        :disabled="isTrainingPassed(training)"
+                        :class="['w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors text-xs sm:text-sm font-semibold', isTrainingPassed(training) ? 'bg-gray-400 hover:bg-gray-400 text-black cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500 text-black']"
                       >
                         <span>👥</span>
                         <span>{{ getRegistrationCount(training) }}</span>
