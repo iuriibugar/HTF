@@ -3,12 +3,6 @@
  * Типи для userService.js
  */
 
-interface UserNotifications {
-  email?: boolean
-  push?: boolean
-  trainingReminders?: boolean
-}
-
 interface TrainingStats {
   registered: number
   completed: number
@@ -27,7 +21,6 @@ interface AdditionalUserData {
   phoneNumber?: string
   experienceLevel?: string
   specialization?: string
-  notifications?: UserNotifications
 }
 
 interface UserProfile {
@@ -58,8 +51,8 @@ interface UserProfile {
   // Статистика тренувань по видах
   trainingStats: TrainingStatistics
   
-  // Налаштування
-  notifications: UserNotifications
+  // Підписки на тренування
+  subscriptions: any[]
   
   // Системні дані
   registeredAt: string
@@ -135,7 +128,6 @@ declare function isUserApproved(
 declare function getUsersStatistics(): Promise<UsersStatistics>
 
 export {
-  UserNotifications,
   AdditionalUserData,
   UserProfile,
   UsersStatistics,

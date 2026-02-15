@@ -65,14 +65,6 @@
                 <p class="text-xs text-green-400 mt-1">✓ Автоматично заповнене з вашого Google акаунту</p>
               </div>
 
-              <!-- Текст про дані -->
-              <div class="bg-yellow-600/20 border-l-4 border-yellow-400 p-4 rounded">
-                <p class="text-yellow-100 text-sm">
-                  ℹ️ <strong>Залиште ваші дані для зворотнього зв'язку.</strong> 
-                  Це допоможе нам швидше обробити вашу заявку. Решта полів заповніть добровільно.
-                </p>
-              </div>
-
               <!-- Ім'я -->
               <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">👤 Ім'я</label>
@@ -80,17 +72,6 @@
                   v-model="formData.firstName"
                   type="text"
                   placeholder="Ваше ім'я"
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 transition"
-                />
-              </div>
-
-              <!-- Прізвище -->
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">👤 Прізвище</label>
-                <input
-                  v-model="formData.lastName"
-                  type="text"
-                  placeholder="Ваше прізвище"
                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 transition"
                 />
               </div>
@@ -106,39 +87,13 @@
                 />
               </div>
 
-              <!-- Місто -->
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">📍 Місто</label>
-                <input
-                  v-model="formData.city"
-                  type="text"
-                  placeholder="Ваше місто"
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 transition"
-                />
-              </div>
-
-              <!-- Рівень досвіду -->
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">🏃 Рівень досвіду</label>
-                <select
-                  v-model="formData.experienceLevel"
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400 transition"
-                >
-                  <option value="">-- Виберіть рівень --</option>
-                  <option value="beginner">Початківець</option>
-                  <option value="intermediate">Любитель</option>
-                  <option value="advanced">Досвідчений</option>
-                  <option value="professional">Професіонал</option>
-                </select>
-              </div>
-
               <!-- Коментарі -->
               <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">💬 Коментарі</label>
+                <label class="block text-sm font-medium text-gray-300 mb-2">💬 Коментар</label>
                 <textarea
                   v-model="formData.bio"
                   placeholder="Розкажіть про себе, ваші цілі та очікування..."
-                  rows="3"
+                  rows="2"
                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 transition resize-none"
                 ></textarea>
               </div>
@@ -152,7 +107,6 @@
               <div v-if="submitted" class="bg-green-600/20 border-2 border-green-400 rounded-lg p-4 text-green-300 text-center">
                 <p class="font-semibold mb-2">✅ Запит успішно відправлено!</p>
                 <p class="text-sm">Адміністратор розглянь вашу заявку протягом 24 годин.</p>
-                <p class="text-xs text-green-400 mt-3">Перенаправляємо на головну сторінку...</p>
               </div>
 
               <!-- Кнопка -->
@@ -171,16 +125,10 @@
                 type="button"
                 @click="goHome"
                 class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg transition duration-200"
-              >
-                🏠 На головну
+              >На головну
               </button>
             </div>
           </form>
-
-          <!-- Підпис -->
-          <p class="text-center text-xs sm:text-sm text-gray-400 mt-6 font-light">
-            Happy TRI Friends - спільнота любителів триатлону
-          </p>
         </div>
       </div>
 
@@ -210,10 +158,7 @@ const isAuthenticated = ref(false)
 const googleEmail = ref('')
 const formData = ref({
   firstName: '',
-  lastName: '',
   phone: '',
-  city: '',
-  experienceLevel: '',
   bio: ''
 })
 
@@ -286,10 +231,7 @@ async function submitRegistration() {
     // Збираємо тільки непусті поля
     const dataToSave = {}
     if (formData.value.firstName) dataToSave.firstName = formData.value.firstName
-    if (formData.value.lastName) dataToSave.lastName = formData.value.lastName
     if (formData.value.phone) dataToSave.phone = formData.value.phone
-    if (formData.value.city) dataToSave.city = formData.value.city
-    if (formData.value.experienceLevel) dataToSave.experienceLevel = formData.value.experienceLevel
     if (formData.value.bio) dataToSave.bio = formData.value.bio
 
     // Зберігаємо нового користувача в базу
@@ -303,10 +245,6 @@ async function submitRegistration() {
 
     if (result) {
       submitted.value = true
-      // Перенаправляємо на головну через 3 секунди
-      setTimeout(() => {
-        goHome()
-      }, 3000)
     } else {
       error.value = 'Помилка при збереженні даних. Спробуйте пізніше.'
     }
