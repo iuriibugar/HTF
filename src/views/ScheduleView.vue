@@ -51,7 +51,7 @@
                 <div 
                   v-for="(training, idx) in dayTrainings" 
                   :key="idx"
-                  class="p-3 sm:p-4 bg-gray-800 rounded-lg border-2 border-yellow-400"
+                  :class="['p-3 sm:p-4 rounded-lg border-2 border-yellow-400 transition-opacity duration-300', isTrainingPassed(training) ? 'bg-gray-500 opacity-90' : 'bg-gray-800']"
                 >
                   <!-- Верхня частина: інформація + кнопка -->
                   <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
@@ -324,6 +324,25 @@ const loadRegistrations = async (scheduleId) => {
   } catch (err) {
     console.error('Помилка завантаження реєстрацій:', err)
   }
+}
+
+// Перевірити чи тренування закінчилась (пройшло більше 1 години з початку)
+const isTrainingPassed = (training) => {
+  if (!training.date || !training.time) return false
+  
+  // Розбираємо час ("HH:MM")
+  const [hours, minutes] = training.time.split(':').map(Number)
+  
+  // Створюємо дату тренування на поточний день або на дату з розкладу
+  const trainingDate = new Date(training.date)
+  trainingDate.setHours(hours, minutes, 0, 0)
+  
+  // Додаємо 1 час до часу початку
+  const trainingEndTime = new Date(trainingDate.getTime() + 60 * 60 * 1000)
+  
+  // Порівнюємо з поточним часом
+  const now = new Date()
+  return now > trainingEndTime
 }
 
 // Завантажити при монтуванні
