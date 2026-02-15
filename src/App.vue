@@ -72,4 +72,30 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style>
+/* Кастомний scrollbar для всіх сторінок */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fbbf24; /* yellow-400 */
+  border-radius: 6px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b; /* yellow-500 */
+}
+
+/* Firefox */
+* {
+  scrollbar-color: #fbbf24 rgba(0, 0, 0, 0.3);
+  scrollbar-width: thin;
+}
+</style>
